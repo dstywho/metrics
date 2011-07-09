@@ -1,5 +1,7 @@
 class Metric < ActiveRecord::Base
 
+  has_many :formula_items, :as => :item
+
   require 'SonarApi'
   require 'json'
   
