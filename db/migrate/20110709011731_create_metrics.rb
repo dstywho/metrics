@@ -7,6 +7,7 @@ class CreateMetrics < ActiveRecord::Migration
       t.integer :direction
       t.boolean :qualitative
       t.string :val_type
+      t.string :key
 
       t.timestamps
     end

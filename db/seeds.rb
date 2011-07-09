@@ -5,3 +5,10 @@
 #
 #   cities = City.create([{ :name => 'Chicago' }, { :name => 'Copenhagen' }])
 #   Mayor.create(:name => 'Daley', :city => cities.first)
+
+# Metric.sync #refresh the set of metricies
+# Project.sync
+
+[ '+', '-', '*', '/', '%','(', ')' ].each do |operator|
+  Operator.create(:name => operator)
+end
