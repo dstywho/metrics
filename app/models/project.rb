@@ -5,7 +5,7 @@ class Project < ActiveRecord::Base
   
   def self.sync
     current_metric_keys = all.map{|metric| metric.key}
-    potential_new_metrics = Json.parse(open(Metric::SONAR_URL + "api/resources?format=json"))
+    potential_new_metrics = JSON.parse(open(Metric::SONAR_URL + "api/resources?format=json").readlines[0])
     
     potential_new_metrics.each do |potential_new_metric|
       create_from_json(potential_new_metric) unless current_metric_keys.include? potential_new_metric[:key]
@@ -13,7 +13,9 @@ class Project < ActiveRecord::Base
   end
   
   def self.create_from_json(params)
-    metric_attrs = params.select{|k,v| columns.include?(k) && k != :id}
+    column_names = columns.map(&:name)
+    metric_attrs = {}
+    params.each{|k,v| metric_attrs[k] = v if column_names.include?(k.to_s) && k != :id}
     create(metric_attrs)
   end
 end

@@ -10,5 +10,6 @@ gem 'sqlite3-ruby', :require => 'sqlite3'
 gem "devise"
 gem "jquery-rails"
 gem "haml", ">= 3.0.0"
+gem "ruby-debug"
 
 gem "json"

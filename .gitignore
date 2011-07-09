@@ -20,3 +20,8 @@ capybara-*.html
 config/*.yml
 rerun.txt
 pickle-email-*.html
+
+#vim
+*.swp
+*.swo
+
