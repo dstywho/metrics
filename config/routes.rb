@@ -1,4 +1,20 @@
 Metrics::Application.routes.draw do
+  resources :metric_snapshots
+
+  resources :constants
+
+  resources :operators
+
+  resources :metrics
+
+  resources :formula_items
+
+  resources :formulas
+
+  resources :projects
+
+  resources :reports
+
   devise_for :users
 
   # The priority is based upon order of creation:

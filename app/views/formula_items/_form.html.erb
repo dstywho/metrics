@@ -1,0 +1,29 @@
+<%= form_for(@formula_item) do |f| %>
+  <% if @formula_item.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@formula_item.errors.count, "error") %> prohibited this formula_item from being saved:</h2>
+
+      <ul>
+      <% @formula_item.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :item_id %><br />
+    <%= f.text_field :item_id %>
+  </div>
+  <div class="field">
+    <%= f.label :item_type %><br />
+    <%= f.text_field :item_type %>
+  </div>
+  <div class="field">
+    <%= f.label :formula_id %><br />
+    <%= f.text_field :formula_id %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

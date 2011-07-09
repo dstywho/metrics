@@ -1,0 +1,23 @@
+<h1>Listing operators</h1>
+
+<table>
+  <tr>
+    <th>Name</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @operators.each do |operator| %>
+  <tr>
+    <td><%= operator.name %></td>
+    <td><%= link_to 'Show', operator %></td>
+    <td><%= link_to 'Edit', edit_operator_path(operator) %></td>
+    <td><%= link_to 'Destroy', operator, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Operator', new_operator_path %>

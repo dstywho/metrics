@@ -1,0 +1,33 @@
+<%= form_for(@metric_snapshot) do |f| %>
+  <% if @metric_snapshot.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@metric_snapshot.errors.count, "error") %> prohibited this metric_snapshot from being saved:</h2>
+
+      <ul>
+      <% @metric_snapshot.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :metric_id %><br />
+    <%= f.text_field :metric_id %>
+  </div>
+  <div class="field">
+    <%= f.label :project_id %><br />
+    <%= f.text_field :project_id %>
+  </div>
+  <div class="field">
+    <%= f.label :value %><br />
+    <%= f.text_field :value %>
+  </div>
+  <div class="field">
+    <%= f.label :date %><br />
+    <%= f.date_select :date %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

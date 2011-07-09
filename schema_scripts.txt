@@ -1,0 +1,11 @@
+rails generate scaffold report name:string date:date
+rails generate scaffold project name:string
+rails generate scaffold formula name:string
+rails generate scaffold formula_item item_id:integer item_type:string formula_id:integer
+rails generate scaffold metric name:string description:string source:string direction:integer qualitative:boolean val_type:string
+rails generate scaffold operator name:string
+rails generate scaffold constant value:decimal
+rails generate scaffold metric_snapshot metric_id:integer project_id:integer value:decimal date:date
+rails generate model formula_report formula_id:integer report_id:integer
+rails generate model project_report project_id:integer report_id:integer
+

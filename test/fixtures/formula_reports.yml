@@ -1,0 +1,9 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+one:
+  formula_id: 1
+  report_id: 1
+
+two:
+  formula_id: 1
+  report_id: 1

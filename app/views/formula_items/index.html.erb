@@ -1,0 +1,27 @@
+<h1>Listing formula_items</h1>
+
+<table>
+  <tr>
+    <th>Item</th>
+    <th>Item type</th>
+    <th>Formula</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @formula_items.each do |formula_item| %>
+  <tr>
+    <td><%= formula_item.item_id %></td>
+    <td><%= formula_item.item_type %></td>
+    <td><%= formula_item.formula_id %></td>
+    <td><%= link_to 'Show', formula_item %></td>
+    <td><%= link_to 'Edit', edit_formula_item_path(formula_item) %></td>
+    <td><%= link_to 'Destroy', formula_item, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Formula item', new_formula_item_path %>

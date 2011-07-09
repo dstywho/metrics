@@ -1,0 +1,35 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Name:</b>
+  <%= @metric.name %>
+</p>
+
+<p>
+  <b>Description:</b>
+  <%= @metric.description %>
+</p>
+
+<p>
+  <b>Source:</b>
+  <%= @metric.source %>
+</p>
+
+<p>
+  <b>Direction:</b>
+  <%= @metric.direction %>
+</p>
+
+<p>
+  <b>Qualitative:</b>
+  <%= @metric.qualitative %>
+</p>
+
+<p>
+  <b>Val type:</b>
+  <%= @metric.val_type %>
+</p>
+
+
+<%= link_to 'Edit', edit_metric_path(@metric) %> |
+<%= link_to 'Back', metrics_path %>

@@ -1,0 +1,29 @@
+<h1>Listing metric_snapshots</h1>
+
+<table>
+  <tr>
+    <th>Metric</th>
+    <th>Project</th>
+    <th>Value</th>
+    <th>Date</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @metric_snapshots.each do |metric_snapshot| %>
+  <tr>
+    <td><%= metric_snapshot.metric_id %></td>
+    <td><%= metric_snapshot.project_id %></td>
+    <td><%= metric_snapshot.value %></td>
+    <td><%= metric_snapshot.date %></td>
+    <td><%= link_to 'Show', metric_snapshot %></td>
+    <td><%= link_to 'Edit', edit_metric_snapshot_path(metric_snapshot) %></td>
+    <td><%= link_to 'Destroy', metric_snapshot, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Metric snapshot', new_metric_snapshot_path %>

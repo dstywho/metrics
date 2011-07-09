@@ -1,0 +1,20 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Item:</b>
+  <%= @formula_item.item_id %>
+</p>
+
+<p>
+  <b>Item type:</b>
+  <%= @formula_item.item_type %>
+</p>
+
+<p>
+  <b>Formula:</b>
+  <%= @formula_item.formula_id %>
+</p>
+
+
+<%= link_to 'Edit', edit_formula_item_path(@formula_item) %> |
+<%= link_to 'Back', formula_items_path %>

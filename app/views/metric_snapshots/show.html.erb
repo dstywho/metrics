@@ -1,0 +1,25 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Metric:</b>
+  <%= @metric_snapshot.metric_id %>
+</p>
+
+<p>
+  <b>Project:</b>
+  <%= @metric_snapshot.project_id %>
+</p>
+
+<p>
+  <b>Value:</b>
+  <%= @metric_snapshot.value %>
+</p>
+
+<p>
+  <b>Date:</b>
+  <%= @metric_snapshot.date %>
+</p>
+
+
+<%= link_to 'Edit', edit_metric_snapshot_path(@metric_snapshot) %> |
+<%= link_to 'Back', metric_snapshots_path %>

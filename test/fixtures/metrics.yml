@@ -1,0 +1,17 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+one:
+  name: MyString
+  description: MyString
+  source: MyString
+  direction: 1
+  qualitative: false
+  val_type: MyString
+
+two:
+  name: MyString
+  description: MyString
+  source: MyString
+  direction: 1
+  qualitative: false
+  val_type: MyString
