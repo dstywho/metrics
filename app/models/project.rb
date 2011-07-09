@@ -5,10 +5,10 @@ class Project < ActiveRecord::Base
   
   def self.sync
     current_metric_keys = all.map{|metric| metric.key}
-    potential_new_metrics = JSON.parse(open(Metric::SONAR_URL + "api/resources?format=json").readlines[0])
+    potential_new_metrics = JSON.parse(SonarApi.resources)
     
     potential_new_metrics.each do |potential_new_metric|
-      create_from_json(potential_new_metric) unless current_metric_keys.include? potential_new_metric[:key]
+      create_from_json(potential_new_metric) unless current_metric_keys.include? potential_new_metric['key']
     end 
   end
   

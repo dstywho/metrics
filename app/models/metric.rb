@@ -1,25 +1,27 @@
 class Metric < ActiveRecord::Base
 
-  require 'open-uri'
-  require 'base64'
+  require 'SonarApi'
   require 'json'
   
   SONAR_URL = "http://nemo.sonarsource.org/" 
   
   def self.sync
     current_metric_keys = all.map{|metric| metric.key}
-    potential_new_metrics = JSON.parse(open(SONAR_URL + "api/metrics?format=json").readlines[0])
+    potential_new_metrics = JSON.parse(SonarApi.metrics)
     
+    
+    new_metrics = []
     potential_new_metrics.each do |potential_new_metric|
-      create_from_json(potential_new_metric) unless current_metric_keys.include? potential_new_metric[:key]
+      new_metrics << filter_new_metrics(potential_new_metric) unless current_metric_keys.include? potential_new_metric['key']
     end 
+    create new_metrics
   end
   
-  def self.create_from_json(params)
+  def self.filter_new_metrics(params)
     column_names = columns.map(&:name)
     metric_attrs = {}
     params.each{|k,v| metric_attrs[k] = v if column_names.include?(k.to_s) }
-    create(metric_attrs)
+    metric_attrs
   end
   
 end

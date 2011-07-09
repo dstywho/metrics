@@ -13,3 +13,4 @@ gem "haml", ">= 3.0.0"
 gem "ruby-debug"
 
 gem "json"
+gem "addressable"
