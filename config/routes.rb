@@ -1,4 +1,7 @@
 Metrics::Application.routes.draw do
+  
+  match 'coffee' => 'projects#coffee'
+  
   resources :metric_snapshots
 
   resources :constants

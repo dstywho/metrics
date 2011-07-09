@@ -1,4 +1,9 @@
 class ProjectsController < ApplicationController
+  
+  def coffee
+    
+  end
+  
   # GET /projects
   # GET /projects.xml
   def index
