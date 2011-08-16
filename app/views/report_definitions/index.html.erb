@@ -1,0 +1,23 @@
+<h1>Listing report_definitions</h1>
+
+<table>
+  <tr>
+    <th>Name</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @report_definitions.each do |report_definition| %>
+  <tr>
+    <td><%= report_definition.name %></td>
+    <td><%= link_to 'Show', report_definition %></td>
+    <td><%= link_to 'Edit', edit_report_definition_path(report_definition) %></td>
+    <td><%= link_to 'Destroy', report_definition, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Report definition', new_report_definition_path %>

@@ -1,5 +1,7 @@
 Metrics::Application.routes.draw do
   
+  resources :report_definitions
+
   match 'coffee' => 'projects#coffee'
   
   resources :metric_snapshots
