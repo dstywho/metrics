@@ -1,8 +1,11 @@
 class CreateReports < ActiveRecord::Migration
   def self.up
     create_table :reports do |t|
-      t.string :name
-      t.date :date
+      t.references :report_definition
+      t.references :formula
+      t.references :grading_scale
+      t.references :grade
+      t.float      :decimal
 
       t.timestamps
     end
