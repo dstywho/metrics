@@ -11,13 +11,11 @@ class Formula < ActiveRecord::Base
     else
       transaction do
         @is_in_transaction = true
-        save!
+        save
         Formula.parse(formula).each do |item|
-          debugger
-          item.formula_items.create!(:formula => self )
-          debugger
+          item.formula_items.create(:formula => self )
         end
-        is_in_transaction = false
+        @is_in_transaction = false
       end
     end
   end
