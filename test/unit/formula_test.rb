@@ -5,4 +5,10 @@ class FormulaTest < ActiveSupport::TestCase
   test "the truth" do
     assert true
   end
+
+  test "parse" do
+    f = "branch_coverage + line_coverage /2"
+    formula_items = Formula.parse(f)  
+    assert formula_items.length == 5
+  end 
 end
