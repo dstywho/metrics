@@ -15,13 +15,11 @@ class Formula < ActiveRecord::Base
           metric_or_operator = rest_of_formula.slice! /^\w+/ 
           if(metric_or_operator.size == 1)
             operator_name = metric_or_operator
-            debugger
             formula_items << find_operator(operator_name)
           else
-            metric_name = metric_or_operator
-            metric = Metric.find_by_name(metric_name)
-            raise "metric is invalid,  #{metric_name} not found" if metric.nil?
-            debugger
+            metric_key = metric_or_operator
+            metric = Metric.find_by_key(metric_key)
+            raise "metric is invalid,  #{metric_key} not found" if metric.nil?
             formula_items << metric
           end
         when /^\d/
@@ -34,7 +32,6 @@ class Formula < ActiveRecord::Base
         else
           #must be an operator
           operator_name = rest_of_formula.slice! /^./ 
-          debugger
           formula_items << find_operator(operator_name)
       end
     end
