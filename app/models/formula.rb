@@ -33,7 +33,7 @@ class Formula < ActiveRecord::Base
           else
             metric_key = metric_or_operator
             metric = Metric.find_by_key(metric_key)
-            raise "metric is invalid,  #{metric_key} not found" if metric.nil?
+            raise "#{metric_key} not a valid metric" if metric.nil?
             formula_items << metric
           end
         when /^\s/
@@ -80,7 +80,7 @@ class Formula < ActiveRecord::Base
 
   def self.find_operator(operator_name)
     operator = Operator.find_by_name(operator_name)
-    raise "operator is invalid, #{operator_name} is not found" if operator.nil?
+    raise "#{operator_name} is not a valid operator. Try using one of these: #{Operator.all.map(&:name).join(', ')}" if operator.nil?
     operator
   end
   
