@@ -24,11 +24,11 @@ class SonarApi
 
   #metric and resource are keys or ids
   #date 
-  def self.timemachine(resource, metrics, date=nil, options = {})
+  def self.timemachine(resource, metrics, options = {})
     metrics ||= []
 
-    options[:from_datetime] = date.iso8601 unless date.nil?
-    options[:to_datetime] = (date + 1.day).iso8601 unless date.nil?
+    options[:from_datetime] = date.iso8601 unless options[:date].nil?
+    options[:to_datetime] = (date + 1.day).iso8601 unless options[:date].nil?
     options[:metrics] = metrics.join(',')
     options[:resource] = resource.to_s
     puts url(:timemachine, options)
