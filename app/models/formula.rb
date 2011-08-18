@@ -1,26 +1,17 @@
 class Formula < ActiveRecord::Base
 
-  attr_accessor :formula, :is_in_transaction
+  attr_accessor :formula 
 
   has_many :formula_items
-    
+  validate :formula_is_valid
 
   def create_or_update
     if @formula.nil? || @is_in_transaction
       super
     else
-      transaction do
-        @is_in_transaction = true
-        save
-        Formula.parse(formula).each do |item|
-          item.formula_items.create(:formula => self )
-        end
-        @is_in_transaction = false
-      end
+      store_with_formula_items
     end
   end
-
-
 
   def self.parse(formula)
     #do naive solution first 
@@ -59,12 +50,39 @@ class Formula < ActiveRecord::Base
 
   private 
 
+  def formula_is_valid
+    unless @formula.nil?
+      begin
+        Formula.parse(@formula)
+      rescue => e
+        self.errors.add(:formula, e.message) 
+      end
+    end
+  end
+  
+  def store_with_formula_items
+      unsuccessful = []
+      transaction do
+        @is_in_transaction = true
+        saved = []
+        saved << save
+        Formula.parse(formula).each do |item|
+          saved << item.formula_items.create(:formula => self )
+        end
+        @is_in_transaction = false
+        saved.each{|s|  unsuccessful << s if s == false }
+        if(! unsuccessful.empty?)
+          raise ActiveRecord::Rollback, "these were unsuccessfully saved: #{unsuccessful.to_yaml}"
+        end
+      end
+      unsuccessful.size == 0
+  end
+
   def self.find_operator(operator_name)
     operator = Operator.find_by_name(operator_name)
     raise "operator is invalid, #{operator_name} is not found" if operator.nil?
     operator
   end
-  
   
   def calculate(date)
     to_s   
