@@ -2,7 +2,7 @@ class Formula < ActiveRecord::Base
 
   attr_accessor :formula 
 
-  has_many :formula_items
+  has_many :formula_items, :dependent => :delete_all
   validate :formula_is_valid
 
   def create_or_update

@@ -3,6 +3,7 @@
 <table>
   <tr>
     <th>Name</th>
+    <th>Formula</th>
     <th></th>
     <th></th>
     <th></th>
@@ -11,6 +12,7 @@
 <% @formulas.each do |formula| %>
   <tr>
     <td><%= formula.name %></td>
+    <td><%= formula.to_s %></td>
     <td><%= link_to 'Show', formula %></td>
     <td><%= link_to 'Edit', edit_formula_path(formula) %></td>
     <td><%= link_to 'Destroy', formula, :confirm => 'Are you sure?', :method => :delete %></td>

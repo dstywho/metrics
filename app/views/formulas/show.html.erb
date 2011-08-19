@@ -4,6 +4,10 @@
   <b>Name:</b>
   <%= @formula.name %>
 </p>
+<p>
+  <b>Formula:</b>
+  <%= @formula.to_s %>
+</p>
 
 
 <%= link_to 'Edit', edit_formula_path(@formula) %> |
