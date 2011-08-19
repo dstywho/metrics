@@ -18,37 +18,59 @@ class Formula < ActiveRecord::Base
     #ex. line_coverage + branch_coverage / 2
     formula_items = []
     rest_of_formula = formula.clone
+    operators = Operator.all.map(&:name)
+    isOperator = Regexp.new("^(#{Operator.all.map(&:escaped).join('|')}){1}")
     while(! rest_of_formula.empty?)
       case rest_of_formula
-        when /^\d/
-          constant_value = rest_of_formula.slice! /^\d+/ 
+        when isOperator
+          operator_name = rest_of_formula.slice! isOperator
+          formula_items << find_operator(operator_name)
+        when /^\d/ #constant
+          constant_value = rest_of_formula.slice! /^(\d|\.)+/ 
           constant = Constant.find_by_value constant_value.to_d
           constant = Constant.create(:value => constant_value.to_d ) if constant.nil?
           formula_items << constant
-        when /^\w/ 
-          metric_or_operator = rest_of_formula.slice! /^\w+/ 
-          if(metric_or_operator.size == 1)
-            operator_name = metric_or_operator
-            formula_items << find_operator(operator_name)
-          else
-            metric_key = metric_or_operator
-            metric = Metric.find_by_key(metric_key)
-            raise "#{metric_key} not a valid metric" if metric.nil?
-            formula_items << metric
-          end
+        when /^\w/ #metric
+          metric_key = rest_of_formula.slice! /^\w+/ 
+          metric = Metric.find_by_key(metric_key)
+          raise "#{metric_key} not a valid metric" if metric.nil?
+          formula_items << metric
         when /^\s/
           rest_of_formula.slice! /^\s+/ 
         else
-          #must be an operator
-          operator_name = rest_of_formula.slice! /^./ 
-          formula_items << find_operator(operator_name)
+          raise "unable to parse the rest of this: '#{rest_of_formula}'"
       end
     end
     formula_items
   end
 
+  def calculate(project, datetime)
+    eval(evaluated_string(project,datetime))
+  end
 
-  private 
+  def evaluated_string(project,datetime)
+    to_be_evaled = to_s
+    snapshots = project.snapshot(formula_items.metrics.map{|m| m.item },datetime)
+    snapshots.each do |snapshot|
+      to_be_evaled.gsub!(snapshot.metric.key, snapshot.value.to_s)  
+    end
+    to_be_evaled
+  end
+
+  def to_s
+    display = ""
+    formula_items.each_with_index do |item, index|
+      display << " " unless index == 0
+      if(item.metric? )
+        display << item.item.key
+      else
+        display << item.item.name.to_s
+      end
+    end
+    display
+  end
+
+private 
 
   def formula_is_valid
     unless @formula.nil?
@@ -80,12 +102,11 @@ class Formula < ActiveRecord::Base
 
   def self.find_operator(operator_name)
     operator = Operator.find_by_name(operator_name)
-    raise "#{operator_name} is not a valid operator. Try using one of these: #{Operator.all.map(&:name).join(', ')}" if operator.nil?
+    raise "'#{operator_name}' is not a valid operator. Try using one of these: #{Operator.all.map(&:name).join(', ')}" if operator.nil?
     operator
   end
+
   
-  def calculate(date)
-    to_s   
-  end
+
 
 end

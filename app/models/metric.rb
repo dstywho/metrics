@@ -5,8 +5,6 @@ class Metric < ActiveRecord::Base
   require 'SonarApi'
   require 'json'
   
-  SONAR_URL = "http://nemo.sonarsource.org/" 
-  
   def self.sync
     current_metric_keys = all.map{|metric| metric.key}
     potential_new_metrics = JSON.parse(SonarApi.metrics)
@@ -25,5 +23,6 @@ class Metric < ActiveRecord::Base
     params.each{|k,v| metric_attrs[k] = v if column_names.include?(k.to_s) }
     metric_attrs
   end
+
   
 end

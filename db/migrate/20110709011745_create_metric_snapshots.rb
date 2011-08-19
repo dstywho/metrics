@@ -4,7 +4,7 @@ class CreateMetricSnapshots < ActiveRecord::Migration
       t.integer :metric_id
       t.integer :project_id
       t.decimal :value
-      t.date :date
+      t.datetime :datetime
 
       t.timestamps
     end

@@ -24,7 +24,7 @@ class SonarApi
 
   #metric and resource are keys or ids
   #date 
-  def self.timemachine(resource, metrics, options = {})
+  def self.timemachine(resource, metrics=[], options = {})
     metrics ||= []
 
     options[:from_datetime] = date.iso8601 unless options[:date].nil?

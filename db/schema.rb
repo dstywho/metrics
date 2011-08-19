@@ -43,7 +43,7 @@ ActiveRecord::Schema.define(:version => 20110816211638) do
     t.integer  "metric_id"
     t.integer  "project_id"
     t.decimal  "value"
-    t.date     "date"
+    t.datetime "datetime"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
