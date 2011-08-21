@@ -37,6 +37,7 @@
     jQuery(document).ready(function(){
       //jQuery('select').chosen();
       jQuery('#projects .nested').nested({addButton:'#projects .add'});
+      jQuery('#evaluations .nested').nested({addButton:'#evaluations .add'});
 
       jQuery('.remove').live('click',function(){
         var checkbox = jQuery(this);
@@ -86,16 +87,18 @@
     <a href="#" class="add">add_project</a>
   </fieldset>
  
-  <fieldset id="evaluatios"><legend>Evaluations</legend>
+  <fieldset id="evaluations"><legend>Evaluations</legend>
     <%= f.fields_for :evaluations do |evaluation| %>
     <div class='nested'>
-      <%= evaluation.select(:fomula_id, Formula.all.map{|p| [p.name, p.id] }) %>
-      <%= evaluation.select(:grade_scale_id, GradingScale.all.map{|p| [p.name, p.id] }) %>
+      <%= evaluation.label :formula %>
+      <%= evaluation.select(:formula_id, Formula.all.map{|p| [p.name, p.id] }) %>
+      <%= evaluation.label :grading_scale %>
+      <%= evaluation.select(:gradeing_scale_id, GradingScale.all.map{|p| [p.name, p.id] }) %>
       <%= evaluation.check_box '_destroy', {:class => 'remove'} %>
       <%= evaluation.label '_destroy', 'Remove' %>
     </div>
     <% end %>
-    <a href="#" class="add">add_project</a>
+    <a href="#" class="add">add_evaluation</a>
   </fieldset>
 
   <div class="actions">
