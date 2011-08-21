@@ -1,0 +1,11 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+one:
+  gradeing_scale: 
+  formula: 
+  report_definition: 
+
+two:
+  gradeing_scale: 
+  formula: 
+  report_definition: 

@@ -1,5 +1,11 @@
 Metrics::Application.routes.draw do
   
+  resources :grades
+
+  resources :evaluations
+
+  resources :grading_scales
+
   resources :report_definitions
 
   match 'coffee' => 'projects#coffee'

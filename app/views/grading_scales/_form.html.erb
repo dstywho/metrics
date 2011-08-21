@@ -1,8 +1,5 @@
 
   <script>
-
-
-
     function Nested(selected){
       this.size = selected.length
       this.last = jQuery(selected.get(this.size - 1))
@@ -36,7 +33,7 @@
 
     jQuery(document).ready(function(){
       //jQuery('select').chosen();
-      jQuery('#projects .nested').nested({addButton:'#projects .add'});
+      jQuery('.nested').nested({addButton:'#add_grade'});
 
       jQuery('.remove').live('click',function(){
         var checkbox = jQuery(this);
@@ -55,49 +52,70 @@
 
   </script>
 
-<%= form_for(@report_definition) do |f| %>
-  <% if @report_definition.errors.any? %>
+
+<script>
+  function sortGrades(){
+    var keys = []
+    var grades = new Array();
+    jQuery('.grade').each(function(){
+        val = jQuery(this).find(":input[name*='value']").val();
+        grades[parseInt(val)] = jQuery(this);
+        keys.push(parseInt(val));
+    });
+    keys.sort();
+    for(var i = 0; i< keys.length; i++){
+      var item = grades[keys[i]];
+      item.detach();
+      jQuery('#grades').prepend(item);
+    }
+  }
+jQuery(document).ready(function(){
+  jQuery(".grade :input[name*='value']").live('change',function(){sortGrades();});
+  
+});
+
+  
+
+
+</script>
+
+
+
+<%= form_for(@grading_scale) do |f| %>
+  <% if @grading_scale.errors.any? %>
     <div id="error_explanation">
-      <h2><%= pluralize(@report_definition.errors.count, "error") %> prohibited this report_definition from being saved:</h2>
+      <h2><%= pluralize(@grading_scale.errors.count, "error") %> prohibited this grading_scale from being saved:</h2>
 
       <ul>
-      <% @report_definition.errors.full_messages.each do |msg| %>
+      <% @grading_scale.errors.full_messages.each do |msg| %>
         <li><%= msg %></li>
       <% end %>
       </ul>
     </div>
   <% end %>
 
-
-
   <div class="field">
     <%= f.label :name %><br />
     <%= f.text_field :name %>
   </div>
-
-  <fieldset id=projects><legend>Projects</legend>
-    <%= f.fields_for :project_report_definitions do |project_form| %>
-    <fieldset class='nested'>
-      <%= project_form.select(:project_id, Project.all.map{|p| [p.name, p.id] }) %>
-      <%= project_form.check_box '_destroy', {:class => 'remove'} %>
-      <%= project_form.label '_destroy', 'Remove' %>
-    </fieldset>
-    <% end %>
-    <a href="#" class="add">add_project</a>
+  
+<fieldset id="grades" ><legend>grades</legend>
+  <% @grading_scale.grades.build %>
+  <%= f.fields_for :grades do |grade| %>
+  <fieldset class="nested grade"><legend>grade</legend>
+  <div class="field">
+    <%= grade.label :name %><br />
+    <%= grade.text_field :name %>
+  </div>
+  <div class="field">
+    <%= grade.label :value %><br />
+    <%= grade.text_field :value %>
+  </div>
   </fieldset>
- 
-  <fieldset id="evaluatios"><legend>Evaluations</legend>
-    <%= f.fields_for :evaluations do |evaluation| %>
-    <div class='nested'>
-      <%= evaluation.select(:fomula_id, Formula.all.map{|p| [p.name, p.id] }) %>
-      <%= evaluation.select(:grade_scale_id, GradingScale.all.map{|p| [p.name, p.id] }) %>
-      <%= evaluation.check_box '_destroy', {:class => 'remove'} %>
-      <%= evaluation.label '_destroy', 'Remove' %>
-    </div>
-    <% end %>
-    <a href="#" class="add">add_project</a>
-  </fieldset>
-
+  <% end %>
+  <a href="#" id="add_grade" class=".add">add grade</a>
+</fieldset>
+  
   <div class="actions">
     <%= f.submit %>
   </div>

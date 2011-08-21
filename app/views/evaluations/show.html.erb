@@ -1,0 +1,20 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Gradeing scale:</b>
+  <%= @evaluation.gradeing_scale %>
+</p>
+
+<p>
+  <b>Formula:</b>
+  <%= @evaluation.formula %>
+</p>
+
+<p>
+  <b>Report definition:</b>
+  <%= @evaluation.report_definition %>
+</p>
+
+
+<%= link_to 'Edit', edit_evaluation_path(@evaluation) %> |
+<%= link_to 'Back', evaluations_path %>
