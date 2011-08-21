@@ -25,6 +25,10 @@ class ReportDefinitionsController < ApplicationController
   # GET /report_definitions/new.xml
   def new
     @report_definition = ReportDefinition.new
+    @projects = Project.all
+    @report_definition.project_report_definitions.build
+    @report_definition.projects.build
+    @report_definition.projects.build
 
     respond_to do |format|
       format.html # new.html.erb

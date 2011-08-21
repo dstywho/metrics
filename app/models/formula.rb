@@ -9,6 +9,7 @@ class Formula < ActiveRecord::Base
     if @formula.nil? || @is_in_transaction
       super
     else
+      formula_items.delete_all unless new_record? 
       store_with_formula_items
     end
   end

@@ -1,3 +1,60 @@
+
+  <script>
+
+
+
+    function Nested(selected){
+      this.size = selected.length
+      this.last = jQuery(selected.get(this.size - 1))
+      this.template = jQuery(selected.get(0)).clone();
+    }
+
+    Nested.prototype.add = function(){
+      var new_item = this.template.clone()
+      var form_items = new_item.find('input,select,textarea');
+      var that = this;
+      form_items.each(function(){
+        var attr = jQuery(this).attr('name');
+        if (typeof attr !== 'undefined' && attr !== false) {
+          jQuery(this).attr('name', attr.replace(/\d+/, that.size + 1));    
+          jQuery(this).removeAttr('id')
+        }
+      });
+      this.last.after(new_item);
+      this.last = new_item;
+      this.size = this.size + 1;
+    }
+
+    $.fn.nested = function(options) {
+      var defaults = {
+        addButton: '#add_button'
+      }
+      var options = $.extend(defaults, options); 
+      var nested = new Nested(this);
+      jQuery(options.addButton).click(function(e){ e.preventDefault(); nested.add(); });
+    };
+
+    jQuery(document).ready(function(){
+      //jQuery('select').chosen();
+      jQuery('#projects .nested').nested({addButton:'#projects .add'});
+
+      jQuery('.remove').live('click',function(){
+        var checkbox = jQuery(this);
+        var siblings = checkbox.siblings();
+        var isChecked = checkbox.is(':checked');
+        var parent = checkbox.parent();
+        if(isChecked){
+          parent.css('background-color', '#ddd');
+          siblings.each(function(){ jQuery(this).css({'background-color': '#FF4040', 'color': '#eee'}); });
+        }else{
+          parent.css('background-color', 'transparent');
+          siblings.each(function(){ jQuery(this).css({'background-color': 'transparent', 'color': 'inherit'}); });
+        }
+      });
+    });
+
+  </script>
+
 <%= form_for(@report_definition) do |f| %>
   <% if @report_definition.errors.any? %>
     <div id="error_explanation">
@@ -11,10 +68,38 @@
     </div>
   <% end %>
 
+
+
   <div class="field">
     <%= f.label :name %><br />
     <%= f.text_field :name %>
   </div>
+
+  <fieldset id=projects><legend>Projects</legend>
+    <%= f.fields_for :project_report_definitions do |project_form| %>
+    <fieldset class='nested'>
+      <%= project_form.select(:project_id, Project.all.map{|p| [p.name, p.id] }) %>
+      <%= project_form.check_box '_destroy', {:class => 'remove'} %>
+      <%= project_form.label '_destroy', 'Remove' %>
+    </fieldset>
+    <% end %>
+    <a href="#" class="add">add_project</a>
+  </fieldset>
+ 
+<!--
+  <fieldset id="evaluatios"><legend>Evaluations</legend>
+    <%= f.fields_for :evaluations do |evaluation| %>
+    <div class='nested'>
+      <%= evaluation.select(:fomula_id, Formula.all.map{|p| [p.name, p.id] }) %>
+      <%# evaluation.select(:grade_scale_id, GradeScale.all.map{|p| [p.name, p.id] }) %>
+      <%= evaluation.check_box '_destroy', {:class => 'remove'} %>
+      <%= evaluation.label '_destroy', 'Remove' %>
+    </div>
+    <% end %>
+    <a href="#" class="add">add_project</a>
+  </fieldset>
+-->
+
   <div class="actions">
     <%= f.submit %>
   </div>

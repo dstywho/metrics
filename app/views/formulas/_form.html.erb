@@ -17,7 +17,7 @@
   </div>
   <div class="field">
     <%= f.label :formula %><br />
-    <%= f.text_field :formula %>
+    <%= f.text_field :formula, {:value => @formula.to_s} %>
   </div>
   <div class="actions">
     <%= f.submit %>

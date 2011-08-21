@@ -1,7 +1,8 @@
 class CreateFormulaReportDefinitions < ActiveRecord::Migration
   def self.up
-    create_table :formula_report_definitions do |t|
+    create_table :evaluations do |t|
       t.integer :formula_id
+      t.integer :grade_scale_id
       t.integer :report_definition_id
 
       t.timestamps
