@@ -1,3 +1,36 @@
+
+<script>
+jQuery(document).ready(function(){
+ var metrics= [<%= Metric.all.map{|m| "'#{m.name}'"}.join(',') %>]; 
+ function Formula(selected){
+  this.lastCarreted = 0;
+ }
+ var formula = new Formula();
+
+ 
+ jQuery('#formula').autocomplete( { 
+    source:metrics, 
+    select: function(event, ui) {
+     event.preventDefault();
+     console.log(event); 
+     console.log(ui.item.value); 
+      
+     var field = jQuery(this);
+     var originalVal = field.val();
+     var replaced = originalVal.substring(0, formula.lastCarreted).replace(/\w+$/, ui.item.value);
+     field.val(replaced + originalVal.substring(formula.lastCarreted, originalVal.length));
+    }
+ });
+ jQuery('#formula').keyup(function(){
+  var field = jQuery(this);
+  var carretPosition = field.caret().start
+  formula.lastCarreted = carretPosition; 
+  var searchTerm = field.val().substring(0, carretPosition).match(/\w+$/);
+  if(searchTerm != null){ field.autocomplete('search', searchTerm[0]); }
+ });
+     
+});
+</script>
 <%= form_for(@formula) do |f| %>
   <% if @formula.errors.any? %>
     <div id="error_explanation">
@@ -17,7 +50,7 @@
   </div>
   <div class="field">
     <%= f.label :formula %><br />
-    <%= f.text_field :formula, {:value => @formula.to_s} %>
+    <%= f.text_field :formula, {:value => @formula.to_s,:id=>'formula'} %>
   </div>
   <div class="actions">
     <%= f.submit %>

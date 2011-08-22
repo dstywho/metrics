@@ -3,6 +3,7 @@
 <table>
   <tr>
     <th>Name</th>
+    <th>Key</th>
     <th>Description</th>
     <th>Source</th>
     <th>Direction</th>
@@ -16,6 +17,7 @@
 <% @metrics.each do |metric| %>
   <tr>
     <td><%= metric.name %></td>
+    <td><%= metric.key %></td>
     <td><%= metric.description %></td>
     <td><%= metric.source %></td>
     <td><%= metric.direction %></td>
