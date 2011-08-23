@@ -1,36 +1,48 @@
 
 <script>
-jQuery(document).ready(function(){
- var metrics= [<%= Metric.all.map{|m| "'#{m.name}'"}.join(',') %>]; 
- function Formula(selected){
-  this.lastCarreted = 0;
- }
- var formula = new Formula();
-
- 
- jQuery('#formula').autocomplete( { 
-    source:metrics, 
-    select: function(event, ui) {
-     event.preventDefault();
-     console.log(event); 
-     console.log(ui.item.value); 
+var metrics= [<%= Metric.all.map{|m| "{ label:'#{m.name}', value:'#{m.key}'}"}.join(',') %>]; 
+function Formula(selected){
+ this.lastCarreted = null;
+ var that = this;
+ var count = 0;
+ function replaceValue(event,ui){
+      event.preventDefault();
+      var field = jQuery(this);
+      if(count == 1){
+        console.log('hohohoh');
+      }
+      console.log('sdsssssssss' + field.caret().start);
+      var originalVal = field.val();
       
-     var field = jQuery(this);
-     var originalVal = field.val();
-     var replaced = originalVal.substring(0, formula.lastCarreted).replace(/\w+$/, ui.item.value);
-     field.val(replaced + originalVal.substring(formula.lastCarreted, originalVal.length));
-    }
+      var replaced = originalVal.substring(0, field.caret().start);
+      replaced = replaced.replace(/(_|\w)+$/, ui.item.value);
+      field.val(replaced + originalVal.substring(field.caret().start, originalVal.length));
+      field.caret(replaced.length,replaced.length);
+      that.lastCarreted = replaced.length;
+      console.log('xxxxxxx' + that.lastCarreted);
+      count++;
+ }
+ selected.autocomplete( { 
+     source:metrics, 
+     select: replaceValue,
+     focus:function(e){e.preventDefault;}
  });
- jQuery('#formula').keyup(function(){
+ selected.keyup(function(){
   var field = jQuery(this);
-  var carretPosition = field.caret().start
-  formula.lastCarreted = carretPosition; 
-  var searchTerm = field.val().substring(0, carretPosition).match(/\w+$/);
+  if(that.lastCarreted != null){
+    field.caret(this.lastCarreted,this.lastCarreted);
+  }
+    
+  var searchTerm = field.val().substring(0, field.caret().start).match(/\w+$/);
   if(searchTerm != null){ field.autocomplete('search', searchTerm[0]); }
- });
-     
+});
+}
+
+jQuery(document).ready(function(){
+ var formula = new Formula(jQuery('#formula'));
 });
 </script>
+
 <%= form_for(@formula) do |f| %>
   <% if @formula.errors.any? %>
     <div id="error_explanation">
@@ -50,7 +62,7 @@ jQuery(document).ready(function(){
   </div>
   <div class="field">
     <%= f.label :formula %><br />
-    <%= f.text_field :formula, {:value => @formula.to_s,:id=>'formula'} %>
+    <%= f.text_area :formula, {:value => @formula.to_s,:id=>'formula', :rows => "5"} %>
   </div>
   <div class="actions">
     <%= f.submit %>

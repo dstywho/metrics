@@ -3,6 +3,23 @@
 <p>
   <b>Name:</b>
   <%= @report_definition.name %>
+  <table> 
+  <thead>
+    <tr>
+      <% @report_definition.evaluations do |evaluation| %>
+      <th><%= evaluation.formula.name %></th>
+      <% end %>
+    </tr>
+  </thead>
+  <tbody>
+      <% @report_definition.projects do |project| %>
+        <%= project.name %>
+      <% end %>
+  </tbody>
+  
+    
+  
+  </table>
 </p>
 
 
