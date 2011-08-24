@@ -3,17 +3,25 @@
 <p>
   <b>Name:</b>
   <%= @report_definition.name %>
+  <% evaluations =  @report_definition.evaluations %>
   <table> 
   <thead>
     <tr>
-      <% @report_definition.evaluations do |evaluation| %>
-      <th><%= evaluation.formula.name %></th>
+      <th>Projects</th>
+      <% evaluations.each do |evaluation| %>
+        <th><%= evaluation.formula.name %></th>
       <% end %>
     </tr>
   </thead>
   <tbody>
-      <% @report_definition.projects do |project| %>
-        <%= project.name %>
+      <% @report_definition.projects.each do |project| %>
+        <tr>
+          <td><%= project.name %></td>
+          <% evaluations.each do |evaluation| %>
+           <td><%= evaluation.formula.to_s %><br /><%= evaluation.formula.evaluated_string(project,@date) %> <br />
+ <%= evaluation.formula.calculate(project,@date)%> </td> 
+          <% end %>
+        </tr>
       <% end %>
   </tbody>
   

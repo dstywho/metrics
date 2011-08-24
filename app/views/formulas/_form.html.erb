@@ -8,10 +8,6 @@ function Formula(selected){
  function replaceValue(event,ui){
       event.preventDefault();
       var field = jQuery(this);
-      if(count == 1){
-        console.log('hohohoh');
-      }
-      console.log('sdsssssssss' + field.caret().start);
       var originalVal = field.val();
       
       var replaced = originalVal.substring(0, field.caret().start);
@@ -19,7 +15,6 @@ function Formula(selected){
       field.val(replaced + originalVal.substring(field.caret().start, originalVal.length));
       field.caret(replaced.length,replaced.length);
       that.lastCarreted = replaced.length;
-      console.log('xxxxxxx' + that.lastCarreted);
       count++;
  }
  selected.autocomplete( { 

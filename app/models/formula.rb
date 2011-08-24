@@ -45,15 +45,23 @@ class Formula < ActiveRecord::Base
     formula_items
   end
 
+  #ajax if possible
+  #possibly SLOW calls Project sync_snapshots
   def calculate(project, datetime)
-    eval(evaluated_string(project,datetime))
+    begin 
+      eval(evaluated_string(project,datetime))
+    rescue Exception => e
+      e.message  
+    end
   end
 
+  #ajax if possible
+  #possibly SLOW calls Project sync_snapshots
   def evaluated_string(project,datetime)
     to_be_evaled = to_s
-    snapshots = project.snapshot(formula_items.metrics.map{|m| m.item },datetime)
+    snapshots = project.snapshots(formula_items.metrics.map{|m| m.item },datetime)
     snapshots.each do |snapshot|
-      to_be_evaled.gsub!(snapshot.metric.key, snapshot.value.to_s)  
+      to_be_evaled.gsub!(snapshot.metric.key, snapshot.value.to_s) unless snapshot.nil?
     end
     to_be_evaled
   end

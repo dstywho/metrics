@@ -14,8 +14,7 @@ class ReportDefinitionsController < ApplicationController
   # GET /report_definitions/1.xml
   def show
     @report_definition = ReportDefinition.find(params[:id])
-    @date = Time.parse(params[:date]) if params[:date]
-    debugger
+    @date = params[:date].nil? ? Time.now : Time.parse(params[:date]) 
 
     respond_to do |format|
       format.html # show.html.erb

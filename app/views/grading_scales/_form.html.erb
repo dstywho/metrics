@@ -70,7 +70,7 @@
     }
   }
 jQuery(document).ready(function(){
-  jQuery(".grade :input[name*='value']").live('change',function(){sortGrades();});
+  jQuery(".grade :input[name*='value']").live('keyup',function(){sortGrades();jQuery(this).focus().effect('highlight', {}, 4000);});
   
 });
 
@@ -103,14 +103,14 @@ jQuery(document).ready(function(){
   <% @grading_scale.grades.build %>
   <%= f.fields_for :grades do |grade| %>
   <fieldset class="nested grade"><legend>grade</legend>
-  <div class="field">
-    <%= grade.label :name %><br />
+  <span class="field">
+    <%= grade.label :name %>
     <%= grade.text_field :name %>
-  </div>
-  <div class="field">
-    <%= grade.label :value %><br />
+  </span>
+  <span class="field">
+    <%= grade.label :value %>
     <%= grade.text_field :value %>
-  </div>
+  </span>
   </fieldset>
   <% end %>
   <a href="#" id="add_grade" class=".add">add grade</a>

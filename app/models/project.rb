@@ -22,11 +22,16 @@ class Project < ActiveRecord::Base
   end
   
 
+  #SLOW
   #metrics are array of Metric
-  def sync_snapshots(metrics)
+  def sync_snapshots(metrics, from_datetime=nil, to_datetime=nil)
     current_snaps = metric_snapshots.where("metric_id in (?)",metrics.map(&:id))
+    
+    options = {}
+    options[:from_datetime] = from_datetime.iso8601 if from_datetime
+    options[:to_datetime] = to_datetime.iso8601 if to_datetime
 
-    sonar_data = JSON.parse(SonarApi.timemachine(key,metrics.map(&:key)))[0]
+    sonar_data = JSON.parse(SonarApi.timemachine(key,metrics.map(&:key),options))[0]
     columns = sonar_data['cols'].map{|c| metrics.find{|m| m.key == c['metric'] }}
     sonar_data['cells'].each do |cell|
       cell['v'].each_with_index do |val,i|
@@ -37,13 +42,23 @@ class Project < ActiveRecord::Base
   end
 
 
-  def snapshot(metrics=[], datetime=nil)
-    sync_snapshots metrics
+
+  #possibly SLOW
+  def snapshots(metrics=[], datetime=nil)
     datetime ||= Time.now
     #todo improve this with better query
+    snapshots = closest_snapshots(metrics,datetime)
+    if MetricSnapshot.stale? snapshots
+      sync_snapshots(metrics,datetime - 1.day,datetime) 
+      snapshots = closest_snapshots(metrics,datetime)
+    end
+    snapshots
+  end
+
+  def closest_snapshots(metrics, datetime)
     snapshots = []
     metrics.each do |metric|
-      snapshots << metric_snapshots.find(:first, "metric = ? and datetime < ?", metric.key, datetime)
+      snapshots << metric_snapshots.where("metric_id = ? and datetime < ?", metric, datetime).order("datetime desc").first
     end
     snapshots
   end

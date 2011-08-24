@@ -10,6 +10,13 @@
   <%= csrf_meta_tag %>
 </head>
 <body>
+<nav>
+<%= link_to 'Report Definitions', report_definitions_path %>
+| <%= link_to 'Formulas', formulas_path %>
+| <%= link_to 'Grading Scales', grading_scales_path %>
+| <%= link_to 'Metrics', metrics_path %>
+| <%= link_to 'Projects', projects_path %>
+</nav>
 
 <%= yield %>
 
