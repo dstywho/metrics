@@ -14,10 +14,15 @@ class FormulasController < ApplicationController
   # GET /formulas/1.xml
   def show
     @formula = Formula.find(params[:id])
+    if params[:project] && params[:datetime]
+      @calculation = @formula.evaluate_by_project_datetime(Project.find_by_id(params[:project]),Time.parse(params[:datetime])) if params[:project] && params[:datetime] 
+    end
 
     respond_to do |format|
+      to_be_rendered = @calculation.nil? ? @formula : @calculation
       format.html # show.html.erb
-      format.xml  { render :xml => @formula }
+      format.xml  { render :xml => to_be_rendered }
+      format.json { render :json => to_be_rendered }
     end
   end
 

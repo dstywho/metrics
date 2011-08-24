@@ -47,13 +47,29 @@ class Formula < ActiveRecord::Base
 
   #ajax if possible
   #possibly SLOW calls Project sync_snapshots
-  def calculate(project, datetime)
-    begin 
-      eval(evaluated_string(project,datetime))
-    rescue Exception => e
-      e.message  
-    end
+  def evaluate_by_project_datetime(project, datetime)
+    evaluated_string = evaluated_string(project,datetime)
+    result = evaluate(evaluated_string[:string])
+    result[:snapshots] = evaluated_string[:snapshots]
+    result[:stale_snapshots] = evaluated_string[:snapshots].select{|s| s.stale? }
+    result
   end
+
+  def evaluate(string)
+    result = {}
+    result[:calculated_string] = string
+    result[:isSuccess] = true 
+    result[:message] = 'success'
+    begin 
+      result[:value] = eval(string) 
+    rescue Exception => e
+      result[:isSuccess] = false
+      result[:message] = e.message
+      result[:value] = ''
+    end
+    result
+  end
+
 
   #ajax if possible
   #possibly SLOW calls Project sync_snapshots
@@ -63,8 +79,9 @@ class Formula < ActiveRecord::Base
     snapshots.each do |snapshot|
       to_be_evaled.gsub!(snapshot.metric.key, snapshot.value.to_s) unless snapshot.nil?
     end
-    to_be_evaled
+    {:snapshots => snapshots,:string => to_be_evaled}
   end
+
 
   def to_s
     display = ""

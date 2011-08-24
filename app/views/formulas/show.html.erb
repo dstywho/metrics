@@ -8,6 +8,15 @@
   <b>Formula:</b>
   <%= @formula.to_s %>
 </p>
+<% unless @calculation.nil? %>
+<div>
+  <h2>
+    <%= (@calculation[:isSuccess]) ? 'Success' : 'Fail' %> 
+  </h2>
+  <%= @calculation[:message] unless @calculation[:isSuccess] %>
+  <%= "#{@calculation[:calculated_string]} = #{@calculation[:value]}" %>
+</div>
+<% end %>
 
 
 <%= link_to 'Edit', edit_formula_path(@formula) %> |

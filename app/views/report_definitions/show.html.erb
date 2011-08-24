@@ -1,3 +1,65 @@
+<% evaluations =  @report_definition.evaluations %>
+
+<style>
+.error {
+  background-color:red;
+}
+.stale{
+  background-color:yellow;
+}
+
+</style>
+
+<script>
+
+function Cell(jqSelected, project_id,evaluation_id,formula_id){
+  this.jqSelected = jqSelected;
+  this.formula_id = formula_id;
+  this.project_id = project_id;
+}
+
+Cell.prototype.calculate = function(){
+  var that = this;
+  var url = '/formulas/' + that.formula_id + '?project=' + that.project_id + '&datetime=' + escape('<%= @date.iso8601 %>');
+
+  jQuery.ajax({
+    url:url,
+    beforeSend:that.beginToSpin,
+    success:function(data){ that.success(data);},
+    error:that.error,
+    dataType:'json' 
+  });
+}
+
+Cell.prototype.beginToSpin = function(){
+}
+
+Cell.prototype.success = function(data, statua){
+  if(data.isSuccess){
+    this.jqSelected.text( data.value );
+    if(data.stale_snapshots.length > 0){
+      this.jqSelected.addClass('stale');
+    }
+  }else{
+    this.jqSelected.addClass('error');
+    this.jqSelected.text( data.message);
+  }
+}
+var cell;
+
+jQuery(document).ready(function(){
+      <% @report_definition.projects.each do |project| %>
+        <% evaluations.each do |evaluation| %>
+          cell = new Cell(jQuery('#<%= cell_id(project,evaluation)%>'), '<%= project.id %>', '<%= evaluation.id %>', '<%= evaluation.formula.id %>');
+          cell.calculate();
+        <% end %>
+      <% end %>
+});
+
+
+
+</script>
+
 <p id="notice"><%= notice %></p>
 
 <p>
@@ -18,8 +80,7 @@
         <tr>
           <td><%= project.name %></td>
           <% evaluations.each do |evaluation| %>
-           <td><%= evaluation.formula.to_s %><br /><%= evaluation.formula.evaluated_string(project,@date) %> <br />
- <%= evaluation.formula.calculate(project,@date)%> </td> 
+           <td id="<%= cell_id(project,evaluation) %>"> </td> 
           <% end %>
         </tr>
       <% end %>
