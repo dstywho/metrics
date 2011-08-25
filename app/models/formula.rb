@@ -51,7 +51,7 @@ class Formula < ActiveRecord::Base
     evaluated_string = evaluated_string(project,datetime)
     result = evaluate(evaluated_string[:string])
     result[:snapshots] = evaluated_string[:snapshots]
-    result[:stale_snapshots] = evaluated_string[:snapshots].select{|s| s.stale? }
+    result[:stale_snapshots] = evaluated_string[:snapshots].select{|s| (! s.nil? ) && s.stale? }
     result
   end
 
@@ -64,7 +64,7 @@ class Formula < ActiveRecord::Base
       result[:value] = eval(string) 
     rescue Exception => e
       result[:isSuccess] = false
-      result[:message] = e.message
+      result[:message] = "error occured attempting to calculate '#{string}'"
       result[:value] = ''
     end
     result

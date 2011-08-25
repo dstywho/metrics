@@ -51,6 +51,7 @@ class Project < ActiveRecord::Base
     if MetricSnapshot.stale? snapshots
       sync_snapshots(metrics,datetime - 1.day,datetime) 
       snapshots = closest_snapshots(metrics,datetime)
+      MetricSnapshot.update_timestamps(snapshots)
     end
     snapshots
   end

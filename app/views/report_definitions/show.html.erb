@@ -1,21 +1,37 @@
 <% evaluations =  @report_definition.evaluations %>
 
+
 <style>
+/*.ui-progressbar{ background-image: url(images/pbar-ani.gif); }*/
 .error {
-  background-color:red;
+  background-color:#ED8593;
 }
 .stale{
-  background-color:yellow;
+  background-color:#F2E194;
 }
 
 </style>
 
 <script>
-
+  function random(min,max){
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+  function increment(bar,max,speed){
+    var interval = null;
+    var animate = function(){
+      value = bar.progressbar("value") + random(0,5);
+      bar.progressbar({value:value});
+      if(value > max){
+        clearInterval(interval);
+      }
+    }
+    interval = setInterval(animate,speed);
+  } 
 function Cell(jqSelected, project_id,evaluation_id,formula_id){
   this.jqSelected = jqSelected;
   this.formula_id = formula_id;
   this.project_id = project_id;
+
 }
 
 Cell.prototype.calculate = function(){
@@ -24,30 +40,43 @@ Cell.prototype.calculate = function(){
 
   jQuery.ajax({
     url:url,
-    beforeSend:that.beginToSpin,
+    beforeSend:function(){that.beginToSpin();},
     success:function(data){ that.success(data);},
-    error:that.error,
+    error:function(xhr){ that.error(xhr.message);},
     dataType:'json' 
   });
 }
 
 Cell.prototype.beginToSpin = function(){
+  var value = 0;
+  var progressbar = this.jqSelected.progressbar({value:value}); 
+  increment(progressbar,random(40,60),random(100,300));
+  
 }
 
 Cell.prototype.success = function(data, statua){
-  if(data.isSuccess){
-    this.jqSelected.text( data.value );
-    if(data.stale_snapshots.length > 0){
-      this.jqSelected.addClass('stale');
-    }
-  }else{
-    this.jqSelected.addClass('error');
-    this.jqSelected.text( data.message);
-  }
+  var that = this;
+    increment(this.jqSelected,100,50);
+    this.jqSelected.progressbar({complete:function(){
+      that.jqSelected.removeClass('ui-progressbar ui-widget-content');
+      if(data.isSuccess){
+        that.jqSelected.text( data.value );
+        if(data.stale_snapshots.length > 0){
+          that.jqSelected.addClass('stale');
+        }
+      }else{
+        that.error(data.message);
+      }
+    }});
 }
-var cell;
+
+Cell.prototype.error = function(message){
+    this.jqSelected.addClass('error');
+    this.jqSelected.text(message);
+}
 
 jQuery(document).ready(function(){
+      var cell;
       <% @report_definition.projects.each do |project| %>
         <% evaluations.each do |evaluation| %>
           cell = new Cell(jQuery('#<%= cell_id(project,evaluation)%>'), '<%= project.id %>', '<%= evaluation.id %>', '<%= evaluation.formula.id %>');
@@ -71,14 +100,14 @@ jQuery(document).ready(function(){
     <tr>
       <th>Projects</th>
       <% evaluations.each do |evaluation| %>
-        <th><%= evaluation.formula.name %></th>
+        <th id="<%= identify(evaluation,evaluation.formula) %>"><%= evaluation.formula.name %>:<%= evaluation.formula.to_s %></th>
       <% end %>
     </tr>
   </thead>
   <tbody>
       <% @report_definition.projects.each do |project| %>
         <tr>
-          <td><%= project.name %></td>
+          <td id="<%= identify(project) %>"><%= project.name %></td>
           <% evaluations.each do |evaluation| %>
            <td id="<%= cell_id(project,evaluation) %>"> </td> 
           <% end %>
@@ -92,5 +121,9 @@ jQuery(document).ready(function(){
 </p>
 
 
+
 <%= link_to 'Edit', edit_report_definition_path(@report_definition) %> |
 <%= link_to 'Back', report_definitions_path %>
+<img src="http://naivepagetracker.heroku.com/websites/6/visit.gif" /> 
+
+

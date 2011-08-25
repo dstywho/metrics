@@ -5,6 +5,18 @@ class MetricSnapshot < ActiveRecord::Base
   def stale?
     datetime < Time.now - 3.day &&  updated_at < Time.now - 1.day
   end
+    
+  def update_timestamp
+    created_at = Time.now
+    updated_at = Time.now
+  end
+
+  def self.update_timestamps(snapshots)
+    snapshots.each do |snapshot|
+      snapshot.update_timestamp unless snapshot.nil?
+      snapshot.save unless snapshot.nil?
+    end
+  end
 
   def self.stale?(snapshots)
     is_stale = false
@@ -16,6 +28,7 @@ class MetricSnapshot < ActiveRecord::Base
     end
     is_stale
   end
+
 
 end
 
