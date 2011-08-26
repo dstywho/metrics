@@ -9,6 +9,24 @@
 .stale{
   background-color:#F2E194;
 }
+.template{
+  display:none;
+}
+.popup{
+  padding:10px;
+  display:none;
+  background-color:#fff;
+  position:absolute;
+  border:1px solid #ddd;
+  -moz-border-radius: 15px;
+  border-radius: 15px;
+}
+fieldset{
+  -moz-border-radius: 15px;
+  border-radius: 15px;
+  border:1px solid #ddd;
+}
+
 
 </style>
 
@@ -20,8 +38,12 @@
     var interval = null;
     var animate = function(){
       value = bar.progressbar("value") + random(0,5);
-      bar.progressbar({value:value});
-      if(value > max){
+      if(value > 100 ){
+        bar.progressbar({value:100});
+      }else{
+        bar.progressbar({value:value});
+      }
+      if(value >= max){
         clearInterval(interval);
       }
     }
@@ -36,6 +58,7 @@ function Cell(jqSelected, project_id,evaluation_id,formula_id){
 
 Cell.prototype.calculate = function(){
   var that = this;
+  this.template = jQuery('#cell_template').clone().removeAttr('id').removeClass('template');
   var url = '/formulas/' + that.formula_id + '?project=' + that.project_id + '&datetime=' + escape('<%= @date.iso8601 %>');
 
   jQuery.ajax({
@@ -58,16 +81,55 @@ Cell.prototype.success = function(data, statua){
   var that = this;
     increment(this.jqSelected,100,50);
     this.jqSelected.progressbar({complete:function(){
+      that.jqSelected.progressbar('destroy');
+      that.jqSelected.text('');
       that.jqSelected.removeClass('ui-progressbar ui-widget-content');
-      if(data.isSuccess){
-        that.jqSelected.text( data.value );
-        if(data.stale_snapshots.length > 0){
-          that.jqSelected.addClass('stale');
-        }
-      }else{
-        that.error(data.message);
-      }
+      that.display(data);
     }});
+}
+
+
+Cell.prototype.display = function(data){
+  function snapshotFromTemplate(snapshot){
+    var template = jQuery('#snapshot_template').clone().removeAttr('id').removeClass('template');
+    if(typeof(snapshot.metric_snapshot) !== 'undefined'){
+    var snap = snapshot.metric_snapshot;
+    
+    template.find('.created_at').text(snap.created_at);
+    template.find('.updated_at').text(snap.updated_at);
+    template.find('.value').text(snap.value);
+    template.find('.datetime').text(snap.datetime);
+    template.find('.metric').text(snap.metric);
+    }else{
+      template.find('.value').text('null');
+      template.addClass('error');
+    }
+    return template;
+  }
+  var that = this;
+  var template = this.template;
+
+  template.find('.evaluated_string').text(data.calculated_string);
+  if(data.isSuccess){
+    template.find('.value').text(data.value);
+  }
+  else if(! data.isSuccess){ 
+    template.find('.value').text(data.message);
+    template.addClass('error'); 
+  }else if(data.stale_snapshots.length > 0){ 
+    template.addClass('stale'); 
+  }
+  var stale_ids = jQuery.map(data.stale_snapshots, function(stale){ return stale.metric_snapshot.metric_id; });
+
+  jQuery(data.snapshots).each(function(){
+    var snapshotTemplate = snapshotFromTemplate(this);  
+    if( typeof(this.metric_snapshot) !== 'undefined' && jQuery.inArray(this.metric_snapshot.metric_id,stale_ids)){
+      snapshotTemplate.addClass('stale');
+    }
+    template.find('.snapshots').append(snapshotTemplate);
+  });
+
+  that.jqSelected.append(template);
 }
 
 Cell.prototype.error = function(message){
@@ -76,6 +138,15 @@ Cell.prototype.error = function(message){
 }
 
 jQuery(document).ready(function(){
+      jQuery('td').live('mouseover mouseout',function(e){
+        if(jQuery(this).has('.popup')){
+          if(event.type =="mouseover"){
+            jQuery(this).find('.popup').show();
+          }else{
+            jQuery(this).find('.popup').hide();
+          }
+        }
+      });
       var cell;
       <% @report_definition.projects.each do |project| %>
         <% evaluations.each do |evaluation| %>
@@ -90,6 +161,21 @@ jQuery(document).ready(function(){
 </script>
 
 <p id="notice"><%= notice %></p>
+<div id="cell_template" class="template"> 
+  value:<div class="value"></div>
+  <div class="popup">
+    calculation:<div class="evaluated_string"></div>
+    <fieldset class="snapshots"><legend>metrics used in calculation</legend></fieldset>
+  </div>
+</div>
+
+  <fieldset id="snapshot_template" class="snapshot template"><legend>snapshot</legend>
+  value: <div class="value"></div>
+  measured on:<div class="datetime"></div>
+  created at: <div class="created_at"></div>
+  updated at: <div class="updated_at"></div>
+  metric:<div class="metric"></div>
+  </fieldset>
 
 <p>
   <b>Name:</b>
