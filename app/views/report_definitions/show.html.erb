@@ -74,18 +74,23 @@ Cell.prototype.beginToSpin = function(){
   var value = 0;
   var progressbar = this.jqSelected.progressbar({value:value}); 
   increment(progressbar,random(40,60),random(100,300));
-  
 }
-
-Cell.prototype.success = function(data, statua){
-  var that = this;
+Cell.prototype.stopSpinning = function(callback){
+    var that = this;
     increment(this.jqSelected,100,50);
     this.jqSelected.progressbar({complete:function(){
       that.jqSelected.progressbar('destroy');
       that.jqSelected.text('');
       that.jqSelected.removeClass('ui-progressbar ui-widget-content');
-      that.display(data);
+      callback.call();
     }});
+}
+
+Cell.prototype.success = function(data, statua){
+    var that = this;
+    that.stopSpinning(function(){
+      that.display(data); 
+    });
 }
 
 
@@ -133,8 +138,16 @@ Cell.prototype.display = function(data){
 }
 
 Cell.prototype.error = function(message){
-    this.jqSelected.addClass('error');
-    this.jqSelected.text(message);
+    var that = this;
+    var data = {
+      isSuccess:false,
+      message:message,
+      snapshots:[],
+      stale_snapshots:[]
+    };
+    that.stopSpinning(function(){
+      that.display(data); 
+    });
 }
 
 jQuery(document).ready(function(){
@@ -161,6 +174,7 @@ jQuery(document).ready(function(){
 </script>
 
 <p id="notice"><%= notice %></p>
+
 <div id="cell_template" class="template"> 
   value:<div class="value"></div>
   <div class="popup">

@@ -42,7 +42,6 @@ class Project < ActiveRecord::Base
   end
 
 
-
   #possibly SLOW
   def snapshots(metrics=[], datetime=nil)
     datetime ||= Time.now

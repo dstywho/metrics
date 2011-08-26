@@ -7,7 +7,6 @@ class MetricSnapshot < ActiveRecord::Base
   end
     
   def update_timestamp
-    created_at = Time.now
     updated_at = Time.now
   end
 
