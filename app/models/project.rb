@@ -20,6 +20,16 @@ class Project < ActiveRecord::Base
     params.each{|k,v| metric_attrs[k] = v if column_names.include?(k.to_s) && k != :id}
     create(metric_attrs)
   end
+
+  def sonar_data(metrics, options, &callback)
+    sonar_data = JSON.parse(SonarApi.timemachine(key,metrics.map(&:key),options))[0]
+    metrics = sonar_data['cols'].map{|c| metrics.find{|m| m.key == c['metric'] }}
+    sonar_data['cells'].each do |cell|
+      cell['v'].each_with_index do |val,i|
+        callback.call(metrics[i],val,Time.parse(cell['d'])) 
+      end
+    end
+  end
   
 
   #SLOW
@@ -30,13 +40,15 @@ class Project < ActiveRecord::Base
     options = {}
     options[:from_datetime] = from_datetime.iso8601 if from_datetime
     options[:to_datetime] = to_datetime.iso8601 if to_datetime
-    sonar_data = JSON.parse(SonarApi.timemachine(key,metrics.map(&:key),options))[0]
-    
-    columns = sonar_data['cols'].map{|c| metrics.find{|m| m.key == c['metric'] }}
-    sonar_data['cells'].each do |cell|
-      cell['v'].each_with_index do |val,i|
-        dtime = Time.parse(cell['d'])
-        MetricSnapshot.create(:metric => columns[i], :project => self, :value =>val, :datetime => dtime ) if current_snaps.find{|s| s.datetime = dtime && s.metric == columns[i] && s.project = self}.nil?
+
+    sonar_data(metrics,options) do |metric,value,datetime|
+      current_snaps.each do |s|
+        if s.datetime == datetime && s.metric == metric && s.project == self #TODO rewrite either === or == maybe
+          s.updated_at
+          s.save
+        else
+          MetricSnapshot.create(:metric => columns[i], :project => self, :value =>val, :datetime => dtime ) 
+        end
       end
     end
   end
@@ -48,11 +60,15 @@ class Project < ActiveRecord::Base
     #todo improve this with better query
     snapshots = closest_snapshots(metrics,datetime)
     if MetricSnapshot.stale? snapshots
-      sync_snapshots(metrics,datetime - 1.day,datetime) 
+      begin
+        sync_snapshots(metrics,datetime - 1.day,datetime) 
+      rescue
+        'failed to retrieve latest snapshots'
+      end
       snapshots = closest_snapshots(metrics,datetime)
-      MetricSnapshot.update_timestamps(snapshots)
+      #MetricSnapshot.update_timestamps(snapshots)
     end
-    snapshots
+    snapshots.select{|s| (! s.nil?) }
   end
 
   def closest_snapshots(metrics, datetime)

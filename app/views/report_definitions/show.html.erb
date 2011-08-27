@@ -3,6 +3,9 @@
 
 <style>
 /*.ui-progressbar{ background-image: url(images/pbar-ani.gif); }*/
+td:hover{
+  background-color:#ddd;
+}
 th{
   text-align:left;
 }
@@ -33,7 +36,11 @@ th .formula{
   width:400px;
 }
 tr > td:last-child .popup{
-  margin-left:-350px;
+  margin-left:-400px;
+}
+tr > td:first-child .popup{/*TODO why*/
+  margin-left:60px !important;
+  margin-top:-5px;
 }
 fieldset{
   -moz-border-radius: 15px;

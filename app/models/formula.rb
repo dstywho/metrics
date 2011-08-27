@@ -49,9 +49,12 @@ class Formula < ActiveRecord::Base
   #possibly SLOW calls Project sync_snapshots
   def evaluate_by_project_datetime(project, datetime)
     evaluated_string = evaluated_string(project,datetime)
+
     result = evaluate(evaluated_string[:string])
     result[:snapshots] = evaluated_string[:snapshots]
     result[:stale_snapshots] = evaluated_string[:snapshots].select{|s| (! s.nil? ) && s.stale? }
+    nil_value_snapshots = result[:snapshots].select{|s| s.value.nil? }
+    result[:message] = "the #{nil_value_snapshots.length > 1 ? 'snapshot'.pluralize : 'snapshot' } for #{nil_value_snapshots.map{|s|s.metric.name}.join(',')} are null" unless nil_value_snapshots.empty?
     result
   end
 
@@ -64,7 +67,8 @@ class Formula < ActiveRecord::Base
       result[:value] = eval(string) 
     rescue Exception => e
       result[:isSuccess] = false
-      result[:message] = "error occured attempting to calculate '#{string}'"
+      result[:message] = "error occured attempting to calculate '#{string}.'"
+      result[:message] = result[:message] + " #{e.message}"
       result[:value] = ''
     end
     result
@@ -76,6 +80,7 @@ class Formula < ActiveRecord::Base
   def evaluated_string(project,datetime)
     to_be_evaled = to_s
     snapshots = project.snapshots(formula_items.metrics.map{|m| m.item },datetime)
+    
     snapshots.each do |snapshot|
       to_be_evaled.gsub!(snapshot.metric.key, snapshot.value.to_s) unless snapshot.nil?
     end
