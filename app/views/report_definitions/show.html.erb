@@ -3,6 +3,13 @@
 
 <style>
 /*.ui-progressbar{ background-image: url(images/pbar-ani.gif); }*/
+th{
+  text-align:left;
+}
+th .formula{
+  font-size:9pt;
+  font-weight:normal;
+}
 .error {
   background-color:#ED8593;
 }
@@ -12,6 +19,7 @@
 .template{
   display:none;
 }
+.hide{ display:none; }
 .popup{
   padding:10px;
   display:none;
@@ -31,6 +39,7 @@ fieldset{
 </style>
 
 <script>
+  
   function random(min,max){
     return Math.floor(Math.random() * (max - min + 1)) + min;
   }
@@ -98,13 +107,17 @@ Cell.prototype.display = function(data){
   function snapshotFromTemplate(snapshot){
     var template = jQuery('#snapshot_template').clone().removeAttr('id').removeClass('template');
     if(typeof(snapshot.metric_snapshot) !== 'undefined'){
-    var snap = snapshot.metric_snapshot;
-    
-    template.find('.created_at').text(snap.created_at);
-    template.find('.updated_at').text(snap.updated_at);
-    template.find('.value').text(snap.value);
-    template.find('.datetime').text(snap.datetime);
-    template.find('.metric').text(snap.metric);
+      var snap = snapshot.metric_snapshot;
+      if(snapshot.is_stale){
+        template.addClass('stale');
+      }
+      template.find('.is_stale').text(snapshot.is_stale);  
+      template.find('.created_at').text(new Date(snap.created_at).toLocaleString());
+      template.find('.updated_at').text(new Date(snap.updated_at).toLocaleString());
+      template.find('.value').text(snap.value);
+      template.find('.datetime').text(new Date(snap.datetime).toLocaleString());
+      template.find('.metric').text(snapshot.metric_name);
+      template.find('.id').text(snap.id);
     }else{
       template.find('.value').text('null');
       template.addClass('error');
@@ -119,7 +132,7 @@ Cell.prototype.display = function(data){
     template.find('.value').text(data.value);
   }
   else if(! data.isSuccess){ 
-    template.find('.value').text(data.message);
+    template.prepend(data.message);
     template.addClass('error'); 
   }else if(data.stale_snapshots.length > 0){ 
     template.addClass('stale'); 
@@ -128,9 +141,6 @@ Cell.prototype.display = function(data){
 
   jQuery(data.snapshots).each(function(){
     var snapshotTemplate = snapshotFromTemplate(this);  
-    if( typeof(this.metric_snapshot) !== 'undefined' && jQuery.inArray(this.metric_snapshot.metric_id,stale_ids)){
-      snapshotTemplate.addClass('stale');
-    }
     template.find('.snapshots').append(snapshotTemplate);
   });
 
@@ -176,7 +186,7 @@ jQuery(document).ready(function(){
 <p id="notice"><%= notice %></p>
 
 <div id="cell_template" class="template"> 
-  value:<div class="value"></div>
+  <div><span class="label">value:</span><span class="value"></span></div>
   <div class="popup">
     calculation:<div class="evaluated_string"></div>
     <fieldset class="snapshots"><legend>metrics used in calculation</legend></fieldset>
@@ -184,11 +194,13 @@ jQuery(document).ready(function(){
 </div>
 
   <fieldset id="snapshot_template" class="snapshot template"><legend>snapshot</legend>
-  value: <div class="value"></div>
-  measured on:<div class="datetime"></div>
-  created at: <div class="created_at"></div>
-  updated at: <div class="updated_at"></div>
-  metric:<div class="metric"></div>
+  <div>metric:<span class="metric"></span></div>
+  <div>value: <span class="value"></span></div>
+  <div class="hide">stale?: <span class="is_stale"></span></div>
+  <div>measured on:<span class="datetime"></span></div>
+  <div class="hide">created at: <span class="created_at"></span></div>
+  <div>last synchronized: <span class="updated_at"></span></div>
+  <div class="hide">id:<span class="id"></span></div>
   </fieldset>
 
 <p>
@@ -200,7 +212,10 @@ jQuery(document).ready(function(){
     <tr>
       <th>Projects</th>
       <% evaluations.each do |evaluation| %>
-        <th id="<%= identify(evaluation,evaluation.formula) %>"><%= evaluation.formula.name %>:<%= evaluation.formula.to_s %></th>
+        <th id="<%= identify(evaluation,evaluation.formula) %>">
+          <%= evaluation.formula.name %>
+          <div class="formula"><span class="label hide">Formula:</span><%= evaluation.formula.to_s %></div>
+        </th>
       <% end %>
     </tr>
   </thead>

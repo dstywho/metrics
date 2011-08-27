@@ -11,6 +11,7 @@ gem "devise"
 gem "jquery-rails"
 gem "haml", ">= 3.0.0"
 gem "ruby-debug"
+gem "mongrel"
 
 gem "json"
 gem "addressable"

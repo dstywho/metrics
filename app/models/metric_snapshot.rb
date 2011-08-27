@@ -2,18 +2,23 @@ class MetricSnapshot < ActiveRecord::Base
   belongs_to :project
   belongs_to :metric
   
+  def as_json(options={})
+    result = super()
+    result[:is_stale] = stale?
+    result[:metric_name] = metric.name
+    result
+  end
+
   def stale?
     datetime < Time.now - 3.day &&  updated_at < Time.now - 1.day
   end
     
-  def update_timestamp
-    updated_at = Time.now
-  end
-
   def self.update_timestamps(snapshots)
     snapshots.each do |snapshot|
-      snapshot.update_timestamp unless snapshot.nil?
-      snapshot.save unless snapshot.nil?
+      unless snapshot.nil?
+        snapshot.updated_at = Time.now
+        snapshot.save
+      end
     end
   end
 

@@ -30,8 +30,8 @@ class Project < ActiveRecord::Base
     options = {}
     options[:from_datetime] = from_datetime.iso8601 if from_datetime
     options[:to_datetime] = to_datetime.iso8601 if to_datetime
-
     sonar_data = JSON.parse(SonarApi.timemachine(key,metrics.map(&:key),options))[0]
+    
     columns = sonar_data['cols'].map{|c| metrics.find{|m| m.key == c['metric'] }}
     sonar_data['cells'].each do |cell|
       cell['v'].each_with_index do |val,i|
