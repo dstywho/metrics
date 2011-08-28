@@ -56,10 +56,10 @@ class Project < ActiveRecord::Base
 
   #possibly SLOW
   def snapshots(metrics=[], datetime=nil)
-    datetime ||= Time.now
     #todo improve this with better query
     snapshots = closest_snapshots(metrics,datetime)
-    if MetricSnapshot.stale? snapshots
+    if datetime.nil? && MetricSnapshot.stale?(snapshots)
+      datetime ||= Time.now
       begin
         sync_snapshots(metrics,datetime - 1.day,datetime) 
       rescue
