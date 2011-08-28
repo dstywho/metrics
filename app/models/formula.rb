@@ -45,46 +45,57 @@ class Formula < ActiveRecord::Base
     formula_items
   end
 
+
+
   #ajax if possible
   #possibly SLOW calls Project sync_snapshots
   def evaluate_by_project_datetime(project, datetime)
-    evaluated_string = evaluated_string(project,datetime)
-
-    result = evaluate(evaluated_string[:string])
-    result[:snapshots] = evaluated_string[:snapshots]
-    result[:stale_snapshots] = evaluated_string[:snapshots].select{|s| (! s.nil? ) && s.stale? }
-    nil_value_snapshots = result[:snapshots].select{|s| s.value.nil? }
-    result[:message] = "the #{nil_value_snapshots.length > 1 ? 'snapshot'.pluralize : 'snapshot' } for #{nil_value_snapshots.map{|s|s.metric.name}.join(',')} are null" unless nil_value_snapshots.empty?
-    result
-  end
-
-  def evaluate(string)
     result = {}
-    result[:calculated_string] = string
     result[:isSuccess] = true 
-    result[:message] = 'success'
-    begin 
-      result[:value] = eval(string) 
+    result[:message] = ''
+    result[:snapshots] = snapshots(project,datetime)
+    result[:stale_snapshots] = result[:snapshots].select{|s| (! s.nil? ) && s.stale? }
+    
+    nil_value_snapshots = result[:snapshots].select{|s| s.value.nil? }
+    result[:message] = "the snapshot(s) for #{nil_value_snapshots.map{|s|s.metric.name}.join(',')} are null" unless nil_value_snapshots.empty?
+
+    begin
+      result[:calculated_string] = evaluated_string(result[:snapshots])
     rescue Exception => e
       result[:isSuccess] = false
-      result[:message] = "error occured attempting to calculate '#{string}.'"
+      result[:message] ||= "error occured creating evaluated_string."
       result[:message] = result[:message] + " #{e.message}"
+      result[:value] = ''
+      return result 
+    end
+
+    begin
+      result[:value] =  eval(result[:calculated_string])
+    rescue Exception => e
+      result[:isSuccess] = false
+      result[:message] = "error occured attempting to calculate '#{result[:calculated_string]}.'"
+      result[:message] = result[:message] + "\n#{e.message}"
       result[:value] = ''
     end
     result
   end
 
 
+  #SLOW
+  def snapshots(project, datetime)
+    project.snapshots(formula_items.metrics.map{|m| m.item },datetime)
+  end
+
   #ajax if possible
   #possibly SLOW calls Project sync_snapshots
-  def evaluated_string(project,datetime)
+  def evaluated_string(snapshots)
+    raise "wrong number of snapshots, expecting #{formula_items.metrics.length} but provided #{snapshots.length}. are we missing some snapshots?" if  snapshots.length != formula_items.metrics.length
     to_be_evaled = to_s
-    snapshots = project.snapshots(formula_items.metrics.map{|m| m.item },datetime)
-    
     snapshots.each do |snapshot|
+      raise if snapshot.value.nil? #"one of the snapshot, #{snapshot.metric.name}, are nil" if snapshot.value.nil?
       to_be_evaled.gsub!(snapshot.metric.key, snapshot.value.to_s) unless snapshot.nil?
     end
-    {:snapshots => snapshots,:string => to_be_evaled}
+    to_be_evaled
   end
 
 

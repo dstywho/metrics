@@ -23,7 +23,7 @@ th .formula{
   display:none;
 }
 .hide{ display:none; }
-.popup{
+.popup,tr > td.calculated:nth-child(2) .popup{
   margin-left:60px;
   margin-top:-5px;
   padding:10px;
@@ -37,10 +37,6 @@ th .formula{
 }
 tr > td:last-child .popup{
   margin-left:-400px;
-}
-tr > td:first-child .popup{/*TODO why*/
-  margin-left:60px !important;
-  margin-top:-5px;
 }
 fieldset{
   -moz-border-radius: 15px;
@@ -141,16 +137,17 @@ Cell.prototype.display = function(data){
   var template = this.template;
 
   template.find('.evaluated_string').text(data.calculated_string);
+
   if(data.isSuccess){
     template.find('.value').text(data.value);
-  }
-  else if(! data.isSuccess){ 
+    if(data.stale_snapshots.length > 0){ 
+      template.addClass('stale'); 
+    }
+  }else if(!data.isSuccess){ 
     template.prepend(data.message);
     template.addClass('error'); 
-  }else if(data.stale_snapshots.length > 0){ 
-    template.addClass('stale'); 
   }
-  var stale_ids = jQuery.map(data.stale_snapshots, function(stale){ return stale.metric_snapshot.metric_id; });
+
 
   jQuery(data.snapshots).each(function(){
     var snapshotTemplate = snapshotFromTemplate(this);  
@@ -176,7 +173,7 @@ Cell.prototype.error = function(message){
 jQuery(document).ready(function(){
       jQuery('td').live('mouseover mouseout',function(e){
         if(jQuery(this).has('.popup')){
-          if(event.type =="mouseover"){
+          if(e.type =="mouseover"){
             jQuery(this).find('.popup').show();
           }else{
             jQuery(this).find('.popup').hide();
@@ -199,7 +196,7 @@ jQuery(document).ready(function(){
 <p id="notice"><%= notice %></p>
 
 <div id="cell_template" class="template"> 
-  <div><span class="label">value:</span><span class="value"></span></div>
+  <div><span class="label hide">value:</span><span class="value"></span></div>
   <div class="popup">
     calculation:<div class="evaluated_string"></div>
     <fieldset class="snapshots"><legend>metrics used in calculation</legend></fieldset>
@@ -235,9 +232,9 @@ jQuery(document).ready(function(){
   <tbody>
       <% @report_definition.projects.each do |project| %>
         <tr>
-          <td id="<%= identify(project) %>"><%= project.name %></td>
+          <td id="<%= identify(project) %>" class="project"><%= project.name %></td>
           <% evaluations.each do |evaluation| %>
-           <td id="<%= cell_id(project,evaluation) %>"> </td> 
+           <td id="<%= cell_id(project,evaluation) %>" class="calculated"> </td> 
           <% end %>
         </tr>
       <% end %>
