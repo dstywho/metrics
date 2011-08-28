@@ -91,7 +91,7 @@ class Formula < ActiveRecord::Base
   def evaluated_string(snapshots)
     raise "wrong number of snapshots, expecting #{formula_items.metrics.length} but provided #{snapshots.length}. are we missing some snapshots?" if  snapshots.length != formula_items.metrics.length
     to_be_evaled = to_s
-    snapshots.each do |snapshot|
+    snapshots.sort{|a,b| b.metric.key.length <=> a.metric.key.length }.each do |snapshot|
       raise if snapshot.value.nil? #"one of the snapshot, #{snapshot.metric.name}, are nil" if snapshot.value.nil?
       to_be_evaled.gsub!(snapshot.metric.key, snapshot.value.to_s) unless snapshot.nil?
     end

@@ -35,36 +35,33 @@ class Project < ActiveRecord::Base
   #SLOW
   #metrics are array of Metric
   def sync_snapshots(metrics, from_datetime=nil, to_datetime=nil)
-    current_snaps = metric_snapshots.where("metric_id in (?)",metrics.map(&:id))
+    current_snaps = metric_snapshots.where("metric_id in (?)",metrics.map(&:id)).all
     
     options = {}
     options[:from_datetime] = from_datetime.iso8601 if from_datetime
     options[:to_datetime] = to_datetime.iso8601 if to_datetime
 
     sonar_data(metrics,options) do |metric,value,datetime|
-      current_snaps.each do |s|
-        if s.datetime == datetime && s.metric == metric && s.project == self #TODO rewrite either === or == maybe
-          s.updated_at
+      matching_snapshots = current_snaps.find{|s|s.datetime == datetime && s.metric == metric}
+      if( matching_snapshots.nil? )
+          MetricSnapshot.create(:metric => metric, :project => self, :value =>value, :datetime => datetime ) 
+      else
+        matching_snapshots.each do |s|
+          s.updated_at = Time.now
           s.save
-        else
-          MetricSnapshot.create(:metric => columns[i], :project => self, :value =>val, :datetime => dtime ) 
-        end
-      end
+        end 
+      end 
     end
   end
 
 
   #possibly SLOW
   def snapshots(metrics=[], datetime=nil)
+    datetime ||= Time.now
     #todo improve this with better query
     snapshots = closest_snapshots(metrics,datetime)
-    if datetime.nil? && MetricSnapshot.stale?(snapshots)
-      datetime ||= Time.now
-      begin
-        sync_snapshots(metrics,datetime - 1.day,datetime) 
-      rescue
-        'failed to retrieve latest snapshots'
-      end
+    if MetricSnapshot.stale? snapshots
+      sync_snapshots(metrics,datetime - 1.day,datetime) 
       snapshots = closest_snapshots(metrics,datetime)
       #MetricSnapshot.update_timestamps(snapshots)
     end

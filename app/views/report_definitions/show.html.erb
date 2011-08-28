@@ -36,7 +36,7 @@ th .formula{
   width:400px;
 }
 tr > td:last-child .popup{
-  margin-left:-400px;
+  margin-left:-250px;
 }
 fieldset{
   -moz-border-radius: 15px;
@@ -117,7 +117,10 @@ Cell.prototype.display = function(data){
     var template = jQuery('#snapshot_template').clone().removeAttr('id').removeClass('template');
     if(typeof(snapshot.metric_snapshot) !== 'undefined'){
       var snap = snapshot.metric_snapshot;
-      if(snapshot.is_stale){
+      if(snap.value == null){
+        template.addClass('error');
+      }
+      else if(snapshot.is_stale){
         template.addClass('stale');
       }
       template.find('.is_stale').text(snapshot.is_stale);  
@@ -183,7 +186,7 @@ jQuery(document).ready(function(){
       var cell;
       <% @report_definition.projects.each do |project| %>
         <% evaluations.each do |evaluation| %>
-          cell = new Cell(jQuery('#<%= cell_id(project,evaluation)%>'), '<%= project.id %>', '<%= evaluation.id %>', '<%= evaluation.formula.id %>');
+          cell = new Cell(jQuery('#<%= cell_id(project,evaluation) %>'), '<%= project.id %>', '<%= evaluation.id %>', '<%= evaluation.formula.id %>');
           cell.calculate();
         <% end %>
       <% end %>

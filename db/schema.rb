@@ -34,13 +34,6 @@ ActiveRecord::Schema.define(:version => 20110821012130) do
     t.datetime "updated_at"
   end
 
-  create_table "formula_report_definitions", :force => true do |t|
-    t.integer  "formula_id"
-    t.integer  "report_definition_id"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-  end
-
   create_table "formulas", :force => true do |t|
     t.string   "name"
     t.datetime "created_at"
