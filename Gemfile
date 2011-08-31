@@ -15,3 +15,5 @@ gem "mongrel"
 
 gem "json"
 gem "addressable"
+
+gem "jira4r"
