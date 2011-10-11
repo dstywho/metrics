@@ -1,25 +1,40 @@
 require 'rubygems'
 require 'addressable/uri'
 require 'open-uri'
+require 'SonarConfig'
+require 'yaml'
+require 'ruby-debug'
 
 class SonarApi
   URI = Addressable::URI.parse "http://nemo.sonarsource.org/api/"
-  
+
+  def self.config
+    f = File.new(Rails.root + "config/sonar.yml")
+    raise "config file missing" unless File.exists? f
+    SonarConfig.from_yaml f
+  end
 
   def self.url(path, options={:format => 'json'})
     options ||= {:format => 'json' }
     options[:format] = 'json' if options[:format].nil?
-    url = URI.join path.to_s
+  
+    debugger
+    url = Addressable::URI.parse(config.api_uri).join path.to_s
     url.query_values = options
     url.to_s
   end
 
+  def self.http_get(path,options={})
+    puts url(path,options)
+    open(url(path, options), :http_basic_authentication => config.http_basic_authentication).readlines[0]
+  end
+
   def self.metrics(options={})
-    open(url(:metrics, options)).readlines[0]
+    http_get(:metrics,options)
   end
 
   def self.resources(options={})
-    open(url(:resources, options)).readlines[0]
+    http_get(:resources,options)
   end
 
   #metric and resource are keys or ids
@@ -31,8 +46,7 @@ class SonarApi
     options[:to_datetime] = (date + 1.day).iso8601 unless options[:date].nil?
     options[:metrics] = metrics.join(',')
     options[:resource] = resource.to_s
-    puts url(:timemachine, options)
-    open(url(:timemachine, options)).readlines[0]
+    http_get(:timemachine,options)
   end
   
   class << self
