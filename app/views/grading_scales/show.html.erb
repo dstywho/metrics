@@ -2,7 +2,19 @@
 
 <p>
   <b>Name:</b>
-  <%= @grading_scale.name %>
+  <%= @grading_scale.name %> <br >
+  <% grades = @grading_scale.grades %>
+  <% grades.each_with_index do |grade,i| %>
+    <%= grade.name %>: 
+    <% if(i == 0) %>
+      <%= grade.value %> > *
+    <% elsif(i == grades.length - 1) %>  
+      * > <%= grade.value %> > <%= grades[i-1].value %>
+    <% else %>  
+      <%= grade.value %> > <%= grades[i-1].value %>
+    <% end %>  
+    <br /> 
+  <% end %> 
 </p>
 
 

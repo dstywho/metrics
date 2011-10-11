@@ -1,7 +1,7 @@
 class CreateEvaluations < ActiveRecord::Migration
   def self.up
     create_table :evaluations do |t|
-      t.references :gradeing_scale
+      t.references :grading_scale
       t.references :formula
       t.references :report_definition
 

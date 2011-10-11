@@ -8,5 +8,9 @@ module ReportDefinitionsHelper
     records.map{|r| "#{r.class.name.downcase}_#{r.id}"}.join('_')
   end
 
+  def date_format(time)
+    time.strftime '%B %e, %Y' 
+  end
+
 
 end

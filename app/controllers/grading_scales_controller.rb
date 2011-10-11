@@ -14,10 +14,16 @@ class GradingScalesController < ApplicationController
   # GET /grading_scales/1.xml
   def show
     @grading_scale = GradingScale.find(params[:id])
+    if params[:project_id] && params[:formula_id]
+      evaluation = Evaluation.first(:conditions => {:grading_scale_id => @grading_scale.id, :formula_id => params[:formula_id] })
+      datetime = params[:datetime] ? Time.parse(params[:datetime]) : Time.now
+      @calculation = evaluation.evaluate(Project.find_by_id(params[:project_id]),datetime)
+    end
 
     respond_to do |format|
+      to_be_rendered = @calculation.nil? ? @grading_scale : @calculation
       format.html # show.html.erb
-      format.xml  { render :xml => @grading_scale }
+      format.xml  { render :xml => to_be_rendered }
     end
   end
 
@@ -25,6 +31,7 @@ class GradingScalesController < ApplicationController
   # GET /grading_scales/new.xml
   def new
     @grading_scale = GradingScale.new
+    @grading_scale.grades.build  
 
     respond_to do |format|
       format.html # new.html.erb

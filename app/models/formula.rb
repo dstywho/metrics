@@ -32,7 +32,7 @@ class Formula < ActiveRecord::Base
           constant = Constant.create(:value => constant_value.to_d ) if constant.nil?
           formula_items << constant
         when /^\w/ #metric
-          metric_key = rest_of_formula.slice! /^\w+/ 
+          metric_key = rest_of_formula.slice! /^\w+(-*\w*)*/ 
           metric = Metric.find_by_key(metric_key)
           raise "#{metric_key} not a valid metric" if metric.nil?
           formula_items << metric

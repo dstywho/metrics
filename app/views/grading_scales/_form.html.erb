@@ -100,16 +100,14 @@ jQuery(document).ready(function(){
   </div>
   
 <fieldset id="grades" ><legend>grades</legend>
-  <% @grading_scale.grades.build %>
   <%= f.fields_for :grades do |grade| %>
   <fieldset class="nested grade"><legend>grade</legend>
   <span class="field">
     <%= grade.label :name %>
     <%= grade.text_field :name %>
-  </span>
-  <span class="field">
     <%= grade.label :value %>
     <%= grade.text_field :value %>
+    <%= grade.check_box '_destroy', {:class => 'remove'} %> <%= grade.label '_destroy', 'Remove' %>
   </span>
   </fieldset>
   <% end %>

@@ -14,10 +14,16 @@ class EvaluationsController < ApplicationController
   # GET /evaluations/1.xml
   def show
     @evaluation = Evaluation.find(params[:id])
+    if params[:project_id]
+      datetime = params[:datetime] ? Time.parse(params[:datetime]) : Time.now
+      @calculation = @evaluation.evaluate(Project.find_by_id(params[:project_id]),datetime)
+    end  
 
     respond_to do |format|
+      to_be_rendered = @calculation.nil? ? @evaluation: @calculation
       format.html # show.html.erb
-      format.xml  { render :xml => @evaluation }
+      format.xml  { render :xml => to_be_rendered}
+      format.json { render :json => to_be_rendered}
     end
   end
 
@@ -29,6 +35,7 @@ class EvaluationsController < ApplicationController
     respond_to do |format|
       format.html # new.html.erb
       format.xml  { render :xml => @evaluation }
+      format.json { render :json => @evaluation }
     end
   end
 

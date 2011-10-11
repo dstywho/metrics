@@ -3,7 +3,6 @@ require 'addressable/uri'
 require 'open-uri'
 require 'SonarConfig'
 require 'yaml'
-require 'ruby-debug'
 
 class SonarApi
   URI = Addressable::URI.parse "http://nemo.sonarsource.org/api/"
@@ -18,7 +17,6 @@ class SonarApi
     options ||= {:format => 'json' }
     options[:format] = 'json' if options[:format].nil?
   
-    debugger
     url = Addressable::URI.parse(config.api_uri).join path.to_s
     url.query_values = options
     url.to_s

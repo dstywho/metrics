@@ -93,7 +93,7 @@
       <%= evaluation.label :formula %>
       <%= evaluation.select(:formula_id, Formula.all.map{|p| [p.name, p.id] }) %>
       <%= evaluation.label :grading_scale %>
-      <%= evaluation.select(:gradeing_scale_id, GradingScale.all.map{|p| [p.name, p.id] }) %>
+      <%= evaluation.select(:grading_scale_id, GradingScale.all.map{|p| [p.name, p.id] }) %>
       <%= evaluation.check_box '_destroy', {:class => 'remove'} %>
       <%= evaluation.label '_destroy', 'Remove' %>
     </div>

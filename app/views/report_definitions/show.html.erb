@@ -2,53 +2,50 @@
 
 
 <style>
-/*.ui-progressbar{ background-image: url(images/pbar-ani.gif); }*/
-td:hover{
-  background-color:#ddd;
-}
-th{
-  text-align:left;
-}
-th .formula{
-  font-size:9pt;
-  font-weight:normal;
-}
-.error {
-  background-color:#ED8593;
-}
-.stale{
-  background-color:#F2E194;
-}
-.template{
-  display:none;
-}
-.hide{ display:none; }
-.popup,tr > td.calculated:nth-child(2) .popup{
-  margin-left:60px;
-  margin-top:-5px;
-  padding:10px;
-  display:none;
-  background-color:#fff;
-  position:absolute;
-  border:1px solid #ddd;
-  -moz-border-radius: 15px;
-  border-radius: 15px;
-  width:400px;
-}
-tr > td:last-child .popup{
-  margin-left:-250px;
-}
-fieldset{
-  -moz-border-radius: 15px;
-  border-radius: 15px;
-  border:1px solid #ddd;
-}
-
-
+  /*.ui-progressbar{ background-image: url(images/pbar-ani.gif); }*/
+  td:hover{
+    background-color:#ddd;
+  }
+  th{
+    text-align:left;
+  }
+  th .formula{
+    font-size:9pt;
+    font-weight:normal;
+  }
+  .error {
+    background-color:#ED8593;
+  }
+  .stale{
+    background-color:#F2E194;
+  }
+  .template{
+    display:none;
+  }
+  .hide{ display:none; }
+  .popup,tr > td.calculated:nth-child(2) .popup{
+    margin-left:60px;
+    margin-top:-5px;
+    padding:10px;
+    display:none;
+    background-color:#fff;
+    position:absolute;
+    border:1px solid #ddd;
+    -moz-border-radius: 15px;
+    border-radius: 15px;
+    width:400px;
+  }
+  tr > td:last-child .popup{
+    margin-left:-250px;
+  }
+  fieldset{
+    -moz-border-radius: 15px;
+    border-radius: 15px;
+    border:1px solid #ddd;
+  }
 </style>
 
 <script>
-  
   function random(min,max){
     return Math.floor(Math.random() * (max - min + 1)) + min;
   }
@@ -67,134 +64,135 @@ fieldset{
     }
     interval = setInterval(animate,speed);
   } 
-function Cell(jqSelected, project_id,evaluation_id,formula_id){
-  this.jqSelected = jqSelected;
-  this.formula_id = formula_id;
-  this.project_id = project_id;
 
-}
+  function Cell(jqSelected, project_id,evaluation_id,formula_id){
+    this.jqSelected = jqSelected;
+    this.formula_id = formula_id;
+    this.project_id = project_id;
+    this.evaluation_id = evaluation_id;
 
-Cell.prototype.calculate = function(){
-  var that = this;
-  this.template = jQuery('#cell_template').clone().removeAttr('id').removeClass('template');
-  var url = '/formulas/' + that.formula_id + '?project=' + that.project_id + '&datetime=' + escape('<%= @date.iso8601 %>');
+  }
 
-  jQuery.ajax({
-    url:url,
-    beforeSend:function(){that.beginToSpin();},
-    success:function(data){ that.success(data);},
-    error:function(xhr){ that.error(xhr.message);},
-    dataType:'json' 
-  });
-}
-
-Cell.prototype.beginToSpin = function(){
-  var value = 0;
-  var progressbar = this.jqSelected.progressbar({value:value}); 
-  increment(progressbar,random(40,60),random(100,300));
-}
-Cell.prototype.stopSpinning = function(callback){
+  Cell.prototype.calculate = function(){
     var that = this;
-    increment(this.jqSelected,100,50);
-    this.jqSelected.progressbar({complete:function(){
-      that.jqSelected.progressbar('destroy');
-      that.jqSelected.text('');
-      that.jqSelected.removeClass('ui-progressbar ui-widget-content');
-      callback.call();
-    }});
-}
+    this.template = jQuery('#cell_template').clone().removeAttr('id').removeClass('template');
+    var url = '/evaluations/' + that.evaluation_id + '.json?project_id=' + that.project_id + '&datetime=' + escape('<%= @date.iso8601 %>');
 
-Cell.prototype.success = function(data, statua){
-    var that = this;
-    that.stopSpinning(function(){
-      that.display(data); 
+    jQuery.ajax({
+      url:url,
+      beforeSend:function(){that.beginToSpin();},
+      success:function(data){ that.success(data);},
+      error:function(xhr){ that.error(xhr.message);},
+      dataType:'json' 
     });
-}
+  }
+
+  Cell.prototype.beginToSpin = function(){
+    var value = 0;
+    var progressbar = this.jqSelected.progressbar({value:value}); 
+    increment(progressbar,random(40,60),random(100,300));
+  }
+  Cell.prototype.stopSpinning = function(callback){
+      var that = this;
+      increment(this.jqSelected,100,50);
+      this.jqSelected.progressbar({complete:function(){
+        that.jqSelected.progressbar('destroy');
+        that.jqSelected.text('');
+        that.jqSelected.removeClass('ui-progressbar ui-widget-content');
+        callback.call();
+      }});
+  }
+
+  Cell.prototype.success = function(data, statua){
+      var that = this;
+      that.stopSpinning(function(){
+        that.display(data); 
+      });
+  }
 
 
-Cell.prototype.display = function(data){
-  function snapshotFromTemplate(snapshot){
-    var template = jQuery('#snapshot_template').clone().removeAttr('id').removeClass('template');
-    if(typeof(snapshot.metric_snapshot) !== 'undefined'){
-      var snap = snapshot.metric_snapshot;
-      if(snap.value == null){
+  Cell.prototype.display = function(data){
+    function snapshotFromTemplate(snapshot){
+      var template = jQuery('#snapshot_template').clone().removeAttr('id').removeClass('template');
+      if(typeof(snapshot.metric_snapshot) !== 'undefined'){
+        var snap = snapshot.metric_snapshot;
+        if(snap.value == null){
+          template.addClass('error');
+        }
+        else if(snapshot.is_stale){
+          template.addClass('stale');
+        }
+        template.find('.is_stale').text(snapshot.is_stale);  
+        template.find('.created_at').text(new Date(snap.created_at).toLocaleString());
+        template.find('.updated_at').text(new Date(snap.updated_at).toLocaleString());
+        template.find('.value').text(snap.value);
+        template.find('.datetime').text(new Date(snap.datetime).toLocaleString());
+        template.find('.metric').text(snapshot.metric_name);
+        template.find('.id').text(snap.id);
+      }else{
+        template.find('.value').text('null');
         template.addClass('error');
       }
-      else if(snapshot.is_stale){
-        template.addClass('stale');
-      }
-      template.find('.is_stale').text(snapshot.is_stale);  
-      template.find('.created_at').text(new Date(snap.created_at).toLocaleString());
-      template.find('.updated_at').text(new Date(snap.updated_at).toLocaleString());
-      template.find('.value').text(snap.value);
-      template.find('.datetime').text(new Date(snap.datetime).toLocaleString());
-      template.find('.metric').text(snapshot.metric_name);
-      template.find('.id').text(snap.id);
-    }else{
-      template.find('.value').text('null');
-      template.addClass('error');
+      return template;
     }
-    return template;
-  }
-  var that = this;
-  var template = this.template;
-
-  template.find('.evaluated_string').text(data.calculated_string);
-
-  if(data.isSuccess){
-    template.find('.value').text(data.value);
-    if(data.stale_snapshots.length > 0){ 
-      template.addClass('stale'); 
-    }
-  }else if(!data.isSuccess){ 
-    template.prepend(data.message);
-    template.addClass('error'); 
-  }
-
-
-  jQuery(data.snapshots).each(function(){
-    var snapshotTemplate = snapshotFromTemplate(this);  
-    template.find('.snapshots').append(snapshotTemplate);
-  });
-
-  that.jqSelected.append(template);
-}
-
-Cell.prototype.error = function(message){
     var that = this;
-    var data = {
-      isSuccess:false,
-      message:message,
-      snapshots:[],
-      stale_snapshots:[]
-    };
-    that.stopSpinning(function(){
-      that.display(data); 
+    var template = this.template;
+
+    template.find('.evaluated_string').text(data.calculated_string);
+
+    if(data.isSuccess){
+      template.find('.value').text(data.value + '/' + data.grade.grade.name );
+      if(data.stale_snapshots.length > 0){ 
+        template.addClass('stale'); 
+      }
+    }else if(!data.isSuccess){ 
+      template.prepend(data.message);
+      template.addClass('error'); 
+    }
+
+
+    jQuery(data.snapshots).each(function(){
+      var snapshotTemplate = snapshotFromTemplate(this);  
+      template.find('.snapshots').append(snapshotTemplate);
     });
-}
 
-jQuery(document).ready(function(){
-      jQuery('td').live('mouseover mouseout',function(e){
-        if(jQuery(this).has('.popup')){
-          if(e.type =="mouseover"){
-            jQuery(this).find('.popup').show();
-          }else{
-            jQuery(this).find('.popup').hide();
-          }
-        }
+    that.jqSelected.append(template);
+  }
+
+  Cell.prototype.error = function(message){
+      var that = this;
+      var data = {
+        isSuccess:false,
+        message:message,
+        snapshots:[],
+        stale_snapshots:[]
+      };
+      that.stopSpinning(function(){
+        that.display(data); 
       });
-      var cell;
-      <% @report_definition.projects.each do |project| %>
-        <% evaluations.each do |evaluation| %>
-          cell = new Cell(jQuery('#<%= cell_id(project,evaluation) %>'), '<%= project.id %>', '<%= evaluation.id %>', '<%= evaluation.formula.id %>');
-          cell.calculate();
+  }
+
+  jQuery(document).ready(function(){
+        jQuery('td').live('mouseover mouseout',function(e){
+          if(jQuery(this).has('.popup')){
+            var popup = jQuery(this).find('.popup');
+            if(e.type =="mouseover"){
+              popup.show();
+            }else{
+              popup.hide();
+            }
+          }
+        });
+        var cell;
+        <% @report_definition.projects.each do |project| %>
+          <% evaluations.each do |evaluation| %>
+            cell = new Cell(jQuery('#<%= cell_id(project,evaluation) %>'), '<%= project.id %>', '<%= evaluation.id %>', '<%= evaluation.formula.id %>');
+            cell.calculate();
+          <% end %>
         <% end %>
-      <% end %>
-});
-
-
-
+  });
 </script>
+
 
 <p id="notice"><%= notice %></p>
 
@@ -216,11 +214,19 @@ jQuery(document).ready(function(){
   <div class="hide">id:<span class="id"></span></div>
   </fieldset>
 
-<p>
-  <b>Name:</b>
-  <%= @report_definition.name %>
-  <% evaluations =  @report_definition.evaluations %>
-  <table> 
+<h1><%= @report_definition.name %> </h1>
+<h2>
+<%= link_to '<', report_definition_path(@report_definition, :date => @date - 1.day) %>
+<%= date_format @date %>
+<% if(@date.today?) %>
+>
+<% else %>
+  <%= link_to '>', report_definition_path(@report_definition, :date => @date + 1.day) %>
+<% end %>
+</h2>
+
+<% evaluations =  @report_definition.evaluations %>
+<table> 
   <thead>
     <tr>
       <th>Projects</th>
@@ -242,11 +248,7 @@ jQuery(document).ready(function(){
         </tr>
       <% end %>
   </tbody>
-  
-    
-  
-  </table>
-</p>
+</table>
 
 
 
