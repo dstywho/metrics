@@ -39,8 +39,8 @@ class SonarApi
   def self.timemachine(resource, metrics=[], options = {})
     metrics ||= []
 
-    options[:from_datetime] = date.iso8601 unless options[:date].nil?
-    options[:to_datetime] = (date + 1.day).iso8601 unless options[:date].nil?
+    options[:fromDateTime] = date.iso8601 unless options[:date].nil?
+    options[:toDateTime] = (date + 1.day).iso8601 unless options[:date].nil?
     options[:metrics] = metrics.join(',')
     options[:resource] = resource.to_s
     http_get(:timemachine,options)

@@ -35,11 +35,13 @@ class Project < ActiveRecord::Base
   #SLOW
   #metrics are array of Metric
   def sync_snapshots(metrics, from_datetime=nil, to_datetime=nil)
-    current_snaps = metric_snapshots.where("metric_id in (?)",metrics.map(&:id)).all
+    current_snaps = metric_snapshots.where("metric_id in (?)",metrics.map(&:id))
+    current_snaps = current_snaps.where("datetime > ?", from_datetime) unless from_datetime.nil?
+    current_snaps = current_snaps.where("datetime < ?", to_datetime) unless to_datetime.nil?
     
     options = {}
-    options[:from_datetime] = from_datetime.iso8601 if from_datetime
-    options[:to_datetime] = to_datetime.iso8601 if to_datetime
+    options[:fromDateTime] = from_datetime.iso8601 if from_datetime
+    options[:toDateTime] = to_datetime.iso8601 if to_datetime
 
     sonar_data(metrics,options) do |metric,value,datetime|
       matching_snapshot = current_snaps.find{|s|s.datetime == datetime && s.metric == metric}

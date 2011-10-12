@@ -82,7 +82,7 @@ class Formula < ActiveRecord::Base
 
   #SLOW
   def snapshots(project, datetime)
-    project.current_snapshots(formula_items.metrics.map{|m| m.item },datetime)
+    project.snapshots(formula_items.metrics.map{|m| m.item },datetime)
   end
 
   #ajax if possible
