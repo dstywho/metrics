@@ -53,6 +53,13 @@ class Project < ActiveRecord::Base
   end
 
 
+  #don't fetch if missing
+  def current_snapshots(metrics=[], datetime=nil)
+    datetime ||= Time.now
+    snapshots = closest_snapshots(metrics,datetime)
+    snapshots.select{|s| (! s.nil?) }
+  end
+
   #possibly SLOW
   def snapshots(metrics=[], datetime=nil)
     datetime ||= Time.now
