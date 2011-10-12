@@ -2,11 +2,17 @@ class EvaluationsController < ApplicationController
   # GET /evaluations
   # GET /evaluations.xml
   def index
-    @evaluations = Evaluation.all
+    if params[:report_definition_id]
+      @evaluations = Evaluation.find_all_by_report_definition_id(params[:report_definition_id])
+    else
+      @evaluations = Evaluation.all
+    end
+      
 
     respond_to do |format|
       format.html # index.html.erb
       format.xml  { render :xml => @evaluations }
+      format.json { render :json => @evaluations }
     end
   end
 
@@ -16,7 +22,11 @@ class EvaluationsController < ApplicationController
     @evaluation = Evaluation.find(params[:id])
     if params[:project_id]
       datetime = params[:datetime] ? Time.parse(params[:datetime]) : Time.now
-      @calculation = @evaluation.evaluate(Project.find_by_id(params[:project_id]),datetime)
+      if params[:all]
+        @calculation = @evaluation.evaluate_all(Project.find_by_id(params[:project_id]),datetime,params[:numMonths])
+      else
+        @calculation = @evaluation.evaluate(Project.find_by_id(params[:project_id]),datetime)
+      end
     end  
 
     respond_to do |format|

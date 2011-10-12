@@ -5,7 +5,6 @@ require 'SonarConfig'
 require 'yaml'
 
 class SonarApi
-  URI = Addressable::URI.parse "http://nemo.sonarsource.org/api/"
 
   def self.config
     f = File.new(Rails.root + "config/sonar.yml")

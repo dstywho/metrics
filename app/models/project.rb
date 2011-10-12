@@ -42,14 +42,12 @@ class Project < ActiveRecord::Base
     options[:to_datetime] = to_datetime.iso8601 if to_datetime
 
     sonar_data(metrics,options) do |metric,value,datetime|
-      matching_snapshots = current_snaps.find{|s|s.datetime == datetime && s.metric == metric}
-      if( matching_snapshots.nil? )
+      matching_snapshot = current_snaps.find{|s|s.datetime == datetime && s.metric == metric}
+      if( matching_snapshot.nil? )
           MetricSnapshot.create(:metric => metric, :project => self, :value =>value, :datetime => datetime ) 
       else
-        matching_snapshots.each do |s|
-          s.updated_at = Time.now
-          s.save
-        end 
+          matching_snapshot.updated_at = Time.now
+          matching_snapshot.save
       end 
     end
   end

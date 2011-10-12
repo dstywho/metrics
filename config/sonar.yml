@@ -1,6 +1,6 @@
 --- !ruby/object:SonarConfig 
-#api_uri: "http://maven.calgbapps.org/sonar/api/"
-api_uri: "http://nemo.sonarsource.org/api/"
-require_authentication: false
-password: password
-username: username
+api_uri: "http://maven.calgbapps.org/sonar/api/"
+#api_uri: "http://nemo.sonarsource.org/api/"
+require_authentication: true
+password: Rome123c
+username: 34653

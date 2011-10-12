@@ -46,7 +46,6 @@ class Formula < ActiveRecord::Base
   end
 
 
-
   #ajax if possible
   #possibly SLOW calls Project sync_snapshots
   def evaluate_by_project_datetime(project, datetime)

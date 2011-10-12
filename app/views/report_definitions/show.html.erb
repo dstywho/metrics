@@ -1,5 +1,7 @@
-<% evaluations =  @report_definition.evaluations %>
 
+<% content_for :head do %>
+  <%= javascript_include_tag 'highcharts' %>
+<% end %>
 
 <style>
   /*.ui-progressbar{ background-image: url(images/pbar-ani.gif); }*/
@@ -45,6 +47,40 @@
   }
 </style>
 
+<script>
+  function createGraph(id){
+       var chart = new Highcharts.Chart({
+      chart: {
+         renderTo:id,
+         type: 'spline'
+      },
+      title: {
+         text: 'Snow depth in the Vikjafjellet mountain, Norway'
+      },
+      subtitle: {
+         text: 'An example of irregular time data in Highcharts JS'   
+      },
+      xAxis: {
+         type: 'datetime',
+         dateTimeLabelFormats: { // don't display the dummy year
+            month: '%e. %b',
+            year: '%b'
+         }
+      },
+      yAxis: {
+         title: {
+            text: 'Units of somesort'
+         }
+      },
+      tooltip: {
+         formatter: function() {
+                   return Highcharts.dateFormat('%e %b, %Y', this.x) +': '+ this.y;
+         }
+      }
+   }); 
+     return chart;       
+  }
+</script>
 <script>
   function random(min,max){
     return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -185,11 +221,57 @@
         });
         var cell;
         <% @report_definition.projects.each do |project| %>
-          <% evaluations.each do |evaluation| %>
+          <% @evaluations.each do |evaluation| %>
             cell = new Cell(jQuery('#<%= cell_id(project,evaluation) %>'), '<%= project.id %>', '<%= evaluation.id %>', '<%= evaluation.formula.id %>');
             cell.calculate();
           <% end %>
         <% end %>
+
+
+      //graphs
+    jQuery.ajax({
+      url:"<%= report_definition_path(@report_definition.id) %>",
+      //beforeSend:function(){that.beginToSpin();},
+      success:function(report_def){ 
+        function evaluation_id(evaluation){
+          return "evaluation_graph_" + evaluation.id;
+        }
+        var jq_graphs = jQuery('#graphs');
+        var graph_template = jQuery("#graph_template").clone().removeAttr('id').removeClass('template');
+        console.log('hello');
+        jQuery.each(report_def.evaluations,function(idx,evaluation_wrapper){
+          var jq_graph = graph_template.clone(); 
+          jq_graph.attr('id', evaluation_id(evaluation_wrapper.evaluation)); 
+          jq_graphs.append(jq_graph);
+          var chart = createGraph(jq_graph.attr('id'));
+          jQuery.each(report_def.projects,function(idx_proj, project_wrapper){
+            var chartGraph = chart;
+            var project_wrapper = project_wrapper;
+            var that = this;
+           jQuery.ajax({dataType:'json',url:"/evaluations/" + evaluation_wrapper.evaluation.id +".json?project_id="+ project_wrapper.project.id + "&all=true&numMonths=5",
+              success:function(calculations){
+                console.log(project_wrapper.project.id);
+                console.log('hello');
+                
+                var data = [];
+                jQuery.each(calculations,function(i,calc){ 
+                  var date =  Date.UTC(calc.date.year,calc.date.month,calc.date.day) 
+                  var val = calc.value;
+                  data.push([date,val]);
+                 });
+                chart.addSeries({
+                    name:project_wrapper.project.name,
+                    data:data 
+                },true,null);
+              }
+            });
+          }); 
+        });
+      },
+      //error:function(xhr){ that.error(xhr.message);},
+      dataType:'json' 
+    });
+         
   });
 </script>
 
@@ -251,6 +333,9 @@
 </table>
 
 
+<div id="graphs">
+    <div id="graph_template" class="template" height="200" width="400" ></div>
+</div>
 
 <%= link_to 'Edit', edit_report_definition_path(@report_definition) %> |
 <%= link_to 'Back', report_definitions_path %>

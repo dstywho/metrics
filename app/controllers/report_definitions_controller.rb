@@ -15,10 +15,14 @@ class ReportDefinitionsController < ApplicationController
   def show
     @report_definition = ReportDefinition.find(params[:id])
     @date = params[:date].nil? ? Time.now : Time.parse(params[:date]) 
+    @evaluations =  @report_definition.evaluations 
+    @projects =  @report_definition.projects
 
     respond_to do |format|
+      to_render = {:id => @report_definition.id , :evaluations => @evaluations, :projects => @projects}
       format.html # show.html.erb
-      format.xml  { render :xml => @report_definition }
+      format.xml  { render :xml => to_render }
+      format.json { render :json => to_render }
     end
   end
 

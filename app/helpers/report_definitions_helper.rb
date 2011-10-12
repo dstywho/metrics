@@ -12,5 +12,9 @@ module ReportDefinitionsHelper
     time.strftime '%B %e, %Y' 
   end
 
+  def formula_graph_id(formula)
+    "formula_graph_#{formula.id}"
+  end
+
 
 end
