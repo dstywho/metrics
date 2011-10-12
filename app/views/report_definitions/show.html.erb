@@ -49,17 +49,17 @@
 </style>
 
 <script>
-  function createGraph(id){
+  function createGraph(id,title,subtitle,yaxis){
        var chart = new Highcharts.Chart({
       chart: {
          renderTo:id,
          type: 'spline'
       },
       title: {
-         text: 'Snow depth in the Vikjafjellet mountain, Norway'
+         text:title 
       },
       subtitle: {
-         text: 'An example of irregular time data in Highcharts JS'   
+         text: subtitle   
       },
       xAxis: {
          type: 'datetime',
@@ -70,12 +70,12 @@
       },
       yAxis: {
          title: {
-            text: 'Units of somesort'
+            text: yaxis
          }
       },
       tooltip: {
          formatter: function() {
-                   return Highcharts.dateFormat('%e %b, %Y', this.x) +': '+ this.y;
+                   return Highcharts.dateFormat('%b %m, %Y', this.x) +' - '+ this.y;
          }
       }
    }); 
@@ -239,16 +239,16 @@
         }
         var jq_graphs = jQuery('#graphs');
         var graph_template = jQuery("#graph_template").clone().removeAttr('id').removeClass('template');
-        jQuery.each(report_def.evaluations,function(idx,evaluation_wrapper){
+        jQuery.each(report_def.evaluations,function(idx,evaluation){
           var jq_graph = graph_template.clone(); 
-          jq_graph.attr('id', evaluation_id(evaluation_wrapper.evaluation)); 
+          jq_graph.attr('id', evaluation_id(evaluation)); 
           jq_graphs.append(jq_graph);
-          var chart = createGraph(jq_graph.attr('id'));
+          var chart = createGraph(jq_graph.attr('id'),evaluation.formula.name, evaluation.formula.formula, evaluation.formula.name);
           jQuery.each(report_def.projects,function(idx_proj, project_wrapper){
             var chartGraph = chart;
             var project_wrapper = project_wrapper;
             var that = this;
-           jQuery.ajax({dataType:'json',url:"/evaluations/" + evaluation_wrapper.evaluation.id +".json?project_id="+ project_wrapper.project.id + "&all=true&numMonths=5",
+           jQuery.ajax({dataType:'json',url:"/evaluations/" + evaluation.id +".json?project_id="+ project_wrapper.project.id + "&all=true&numMonths=5",
               success:function(calculations){
                 
                 var data = [];

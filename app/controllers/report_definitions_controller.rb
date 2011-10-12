@@ -19,7 +19,8 @@ class ReportDefinitionsController < ApplicationController
     @projects =  @report_definition.projects
 
     respond_to do |format|
-      to_render = {:id => @report_definition.id , :evaluations => @evaluations, :projects => @projects}
+      to_render = {:id => @report_definition.id , :evaluations => @evaluations.map{|e| e.to_hash }, :projects => @projects}
+      
       format.html # show.html.erb
       format.xml  { render :xml => to_render }
       format.json { render :json => to_render }

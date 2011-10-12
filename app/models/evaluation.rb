@@ -23,4 +23,9 @@ class Evaluation < ActiveRecord::Base
     end
     results
   end
+  
+  def to_hash
+    extended_attr = {:formula => formula.attributes.to_options.merge({:formula=> formula.to_s}) }
+    self.attributes.to_options.merge(extended_attr)
+  end
 end
